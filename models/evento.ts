@@ -14,7 +14,8 @@ const eventoSchema = new mongoose.Schema({
     required: false
   },
   ubicacion: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Venue",
     required: true
   },
   fechaHora: {

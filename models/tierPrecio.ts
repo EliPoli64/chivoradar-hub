@@ -17,3 +17,5 @@ const tierSchema = new mongoose.Schema({
 })
 
 const TierPrecio = mongoose.models.TierPrecio || mongoose.model("TierPrecio", tierSchema);
+
+export default TierPrecio;
