@@ -11,10 +11,7 @@ export default function Home() {
       
       {/* hero */}
       <section className="px-6 pt-24 pb-12 md:pt-32">
-        <Hero 
-          title="No se pierda el próximo chivo."
-          subtitle="El mejor radar de música en vivo en tida Tiquicia."
-        />
+        <Hero />
       </section>
 
       {/* mapa interactivo */}
