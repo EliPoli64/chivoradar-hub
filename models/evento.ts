@@ -25,6 +25,10 @@ const eventoSchema = new mongoose.Schema({
   descripcion: {
     type: String,
     required: false
+  },
+  link: {
+    type: String,
+    required: true
   }
 
 })
