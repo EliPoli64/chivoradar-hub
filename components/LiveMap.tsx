@@ -1,22 +1,88 @@
 "use client";
+import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import MapaChivos from "@/components/Map";
 
-export default function LiveMap() {
-  const cantChivos = 0;
-  return (
-    <div className="relative w-full h-[400px] md:h-[500px] bg-zinc-800 rounded-2xl overflow-hidden group">
-      {/* Grid Pattern Background for "Radar" effect */}
-      <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+const MapSkeleton = () => (
+  <div className="relative inset-0 flex flex-col items-center justify-center bg-zinc-900 z-2">
+    {/* Animated Radar Pulse */}
+    <div className="relative flex items-center justify-center w-32 h-32">
+      <div className="absolute inset-0 border-2 border-neon-green/30 rounded-full animate-ping" />
+      <div className="absolute inset-4 border border-neon-green/50 rounded-full animate-[ping_1.5s_linear_infinite]" />
+      <div className="w-4 h-4 bg-neon-green rounded-full shadow-[0_0_20px_#ccff00] z-20" />
       
-      <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 border-4 border-neon-green rounded-full animate-ping absolute" />
-        <div className="w-4 h-4 bg-neon-green rounded-full shadow-[0_0_20px_#ccff00]" />
-        <p className="text-xs uppercase tracking-widest font-bold text-neon-green animate-pulse">Escaneando toda Tiquicia...</p>
-      </div>
+      {/* Rotating Radar Line */}
+      <div className="absolute w-full h-full border-t border-neon-green/20 rounded-full animate-spin [animation-duration:3s]" />
+    </div>
 
-      <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-        <div className="bg-black/80 backdrop-blur-md p-4 rounded-xl border border-white/10">
-          <p className="text-xs text-zinc-500 uppercase font-bold">Activos Ahora</p>
-          <p className="text-2xl font-bold">{cantChivos} Chivos Ahora</p>
+    <div className="mt-8 flex flex-col items-center gap-2">
+      <p className="text-xs uppercase tracking-[0.3em] font-black text-neon-green animate-pulse">
+        Sincronizando Satélites...
+      </p>
+      <div className="w-48 h-[2px] bg-zinc-800 rounded-full overflow-hidden">
+        <div className="h-full bg-neon-green animate-[loading_2s_ease-in-out_infinite]" />
+      </div>
+    </div>
+
+    {/* Decorative Coordinates for flavor */}
+    <div className="absolute bottom-10 font-mono text-[10px] text-zinc-500 flex gap-10">
+      <span>LAT: 9.9281° N</span>
+      <span>LON: 84.0907° W</span>
+    </div>
+
+    <style jsx>{`
+      @keyframes loading {
+        0% { transform: translateX(-100%); }
+        50% { transform: translateX(0); }
+        100% { transform: translateX(100%); }
+      }
+    `}</style>
+  </div>
+);
+
+const Map = dynamic(() => import("@/components/Map"), {
+  ssr: false,
+  loading: () => <MapSkeleton />,
+});
+
+export default function LiveMap(props: any) {
+  const [cantChivos, setCantChivos] = useState(0);
+  const { position, zoom } = props;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("api/fetch");
+        const responseFetch = await response.json();
+        setCantChivos(responseFetch.data?.length || 0);
+      } catch (error) {
+        console.error("Error fetching chivos:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <div className="relative mx-auto w-[1000px] h-[400px] md:h-[550px] bg-zinc-900 rounded-2xl overflow-hidden group border border-white/5">
+      {/* fondo */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] z-10" />
+      
+      {/* dynamapa */}
+      <MapaChivos position={position} zoom={zoom} />
+
+      {/* overlay */}
+      <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end z-[500]">
+        <div className="bg-black/60 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">Radar en Vivo</p>
+          </div>
+          <p className="text-2xl font-black text-white italic tracking-tighter">
+            {cantChivos} <span className="text-neon-green">CHIVOS</span> ENCONTRADOS
+          </p>
         </div>
       </div>
     </div>

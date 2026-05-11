@@ -15,8 +15,8 @@ export default function Home() {
       </section>
 
       {/* mapa interactivo */}
-      <section className="px-4 py-8">
-        <div className="rounded-3xl border border-white/10 bg-zinc-900/50 p-2 overflow-hidden">
+      <section className="px-4 py-8 mx-auto">
+        <div className="rounded-3xl w-[1020px] border border-white/10 bg-zinc-900/50 p-2 overflow-hidden mx-auto">
           <LiveMap />
         </div>
       </section>

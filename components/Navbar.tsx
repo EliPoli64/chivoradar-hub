@@ -3,7 +3,7 @@ import { MapPin, Search, Music } from 'lucide-react';
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/60 backdrop-blur-md">
+    <nav className="fixed top-0 w-full z-1001 border-b border-white/10 bg-black/60 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tighter">
           <div className="bg-neon-green p-1 rounded">
