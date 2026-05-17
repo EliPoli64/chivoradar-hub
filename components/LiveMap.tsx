@@ -49,19 +49,6 @@ export default function LiveMap(props: any) {
   const [cantChivos, setCantChivos] = useState(0);
   const { position, zoom } = props;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("api/fetch");
-        const responseFetch = await response.json();
-        setCantChivos(responseFetch.data?.length || 0);
-      } catch (error) {
-        console.error("Error fetching chivos:", error);
-      }
-    };
-    fetchData();
-  }, []);
-
   return (
     <div className="relative mx-auto w-[1000px] h-[400px] md:h-[550px] bg-zinc-900 rounded-2xl overflow-hidden group border border-white/5">
       {/* fondo */}

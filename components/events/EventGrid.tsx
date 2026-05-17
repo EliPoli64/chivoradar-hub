@@ -13,14 +13,14 @@ interface Evento {
 }
 
 export default function EventGrid() {
-  const gigs: Evento[] = [];
+  var gigs: Evento[] = [];
 
   useEffect(() => {
     const fetchEventos = async () => { 
       try {
         const response = await fetch('/api/fetch');
-        const data = await response.json();
-        console.log('Fetched data:', data);
+        gigs = await response.json();
+        console.log('Fetched data:', gigs);
         
       } catch (error) {
         console.error('Error fetching eventos:', error);
