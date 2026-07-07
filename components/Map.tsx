@@ -158,6 +158,7 @@ export default function MapaChivos({ position, zoom }: any) {
   }
 
   return (
+    <div className="w-full h-full">
     <MapComponents.MapContainer 
       center={[9.800090306914088, -84.03119843292991]} 
       zoom={8} 
@@ -211,5 +212,21 @@ export default function MapaChivos({ position, zoom }: any) {
         ))}
       </MapComponents.MarkerClusterGroup>
     </MapComponents.MapContainer>
+    {/* overlay */}
+      <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end z-[500]">
+        <div className="bg-black/60 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">Radar en Vivo</p>
+          </div>
+          <p className="text-2xl font-black text-white italic tracking-tighter">
+            {events.length} <span className="text-neon-green">CHIVOS</span> ENCONTRADOS
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
