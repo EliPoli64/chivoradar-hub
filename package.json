@@ -10,15 +10,13 @@
   },
   "dependencies": {
     "@next/env": "^16.2.4",
-    "@sparticuz/chromium-min": "^148.0.0",
     "dotenv": "^17.4.2",
     "inngest": "^4.2.6",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "lucide-react": "^1.14.0",
     "mongoose": "^9.6.1",
-    "next": "16.2.4",
-    "puppeteer-core": "^24.42.0",
+    "next": "^16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-leaflet": "^5.0.0",
@@ -32,7 +30,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
-    "puppeteer": "^24.42.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
