@@ -45,6 +45,7 @@ export async function GET(request: Request) {
           descripcion: 1,
           link: 1,
           urlImagen: 1,
+          venueId: { $toString: '$venueInfo._id' },
           venueObj: {
             nombre: '$venueInfo.nombre',
             slug: '$venueInfo.slug',
@@ -59,7 +60,8 @@ export async function GET(request: Request) {
               as: 'tier',
               in: {
                 nombre: '$$tier.nombre',
-                precio: '$$tier.precio'
+                precio: '$$tier.precio',
+                moneda: '$$tier.moneda'
               }
             }
           }
@@ -69,6 +71,8 @@ export async function GET(request: Request) {
         $sort: { fechaHora: 1 }
       }
     ]);
+
+    console.log('Found events:', JSON.stringify(eventos, null, 2));
 
     const formattedEvents = eventos.map((event: any) => {
       let fechaCorrecta = event.fechaHora;

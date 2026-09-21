@@ -9,6 +9,10 @@ const tierSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  moneda: {
+    type: String,
+    required: true
+  },
   evento: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Evento",

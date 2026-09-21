@@ -15,9 +15,9 @@ const venueSchema = new mongoose.Schema({
       enum: ['Point'],
       default: 'Point'
     },
-    coordenadas: {
-      type: [Number], // almacenadas como [longitud, latitud]
-      required: true
+    coordinates: {
+      type: [Number],
+      required: false
     }
   },
   direccion: { // las direcciones en Costa Rica son complicadas

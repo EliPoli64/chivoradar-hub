@@ -167,7 +167,7 @@ export default function MapaChivos({ position, zoom }: any) {
       style={{ background: "#555561" }}
     >
       <MapComponents.TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        url={`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${process.env.NEXT_PUBLIC_CARTO_API_KEY}`}
       />
 
       <MapComponents.MarkerClusterGroup
