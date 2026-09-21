@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chivo Radar
+
+The best map for live music in Costa Rica. From underground garage bands to stadium tours. Find your next gig ("chivo") across the country.
+
+## Features
+
+- **Interactive Map** — Live map (Leaflet) with event pins across the country, grouped by zone with animated clusters.
+- **Live Radar** — Real-time counter of gigs found.
+- **Event Grid** — Recommended events ("Cerca Tuyo") with image cards, genre, venue, and date.
+- **Genre Filters** — Filter bar (Rock, Electronic, Metal, Jazz, Reggae, Indie, Salsa).
+- **Search** — By artist, genre, or venue.
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org) (App Router) + React 19
+- [Tailwind CSS 4](https://tailwindcss.com)
+- [MongoDB](https://www.mongodb.com) + [Mongoose](https://mongoosejs.com)
+- [Leaflet](https://leafletjs.com) + [react-leaflet](https://react-leaflet.js.org) + [react-leaflet-cluster](https://www.npmjs.com/package/react-leaflet-cluster)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- MongoDB (local or remote)
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment Setup
+
+Create a `.env.local` file in the project root:
+
+```
+CONN_STRING=mongodb://localhost:27017/loudmap
+```
+
+> `CONN_STRING` is the MongoDB connection string. If not set, it defaults to `mongodb://localhost:27017/loudmap`.
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+### Lint
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command         | Description                      |
+| --------------- | -------------------------------- |
+| `npm run dev`   | Starts the dev server            |
+| `npm run build` | Production build                 |
+| `npm run start` | Starts the production server     |
+| `npm run lint`  | Runs ESLint                      |
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+app/
+├── api/fetch/       # API route: events with venues and price tiers
+├── layout.tsx       # Root layout (metadata: "Chivo Radar")
+└── page.tsx         # Home: Hero, live map, event grid, footer
+components/
+├── events/          # EventCard, EventGrid, FilterBar
+├── Hero.tsx         # Hero with search bar
+├── LiveMap.tsx      # Map wrapper with animated skeleton
+├── Map.tsx          # Leaflet map with clusters and popups
+├── Navbar.tsx
+└── Footer.tsx
+db/
+└── mongodb.ts       # MongoDB connection with Mongoose
+models/              # Mongoose models: Evento, Venue, TierPrecio
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Data Models
+
+- **Evento** — Title, category, image, location (ref to `Venue`), date/time, description, ticketing link.
+- **Venue** — Name, slug, GeoJSON coordinates `[longitude, latitude]`, address, social media links.
+- **TierPrecio** — Priced tier per event (e.g., VIP, General, etc.).
+
+## API
+
+### `GET /api/fetch`
+
+Returns events with their venues and price tiers, sorted by date. Each event includes: `id`, `titulo`, `artista`, `categoria`, `fechaHora`, `descripcion`, `link`, `urlImagen`, `venueObj` (with `lat`/`lng`), `venue`, and `tiersPrecio`.
+
+## Roadmap / In Progress
+
+- User gig submissions ("+ Add Your Gig")
+- Province-based exploration routes (`/explore`, `/venues`, `/submit`)
+- Ticket-selling site scraping (moved to a separate repository)
