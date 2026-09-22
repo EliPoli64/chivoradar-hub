@@ -1,8 +1,12 @@
+"use client";
+import { useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import Logo from "@/components/Logo";
 
 export default function Navbar() {
+  const [open, setOpen] = useState(false);
+
   return (
     <nav className="fixed top-0 inset-x-0 z-[1001] border-b border-hueso/10 bg-cafetal/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
@@ -28,13 +32,61 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <a
-          href="#mapa"
-          aria-label="Buscar en el mapa"
-          className="md:hidden text-hueso p-1"
-        >
-          <Search size={22} />
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="#mapa"
+            aria-label="Buscar en el mapa"
+            className="hidden md:flex text-hueso p-1"
+          >
+            <Search size={22} />
+          </a>
+          <button
+            onClick={() => setOpen(!open)}
+            aria-label="Abrir menú"
+            className="md:hidden text-hueso p-1"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+      </div>
+
+      {/* mobile overlay */}
+      <div
+        className={`md:hidden fixed inset-x-0 top-16 bg-cafetal/95 backdrop-blur-xl border-b border-hueso/10 transition-all duration-300 overflow-hidden ${
+          open ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="px-5 py-4 space-y-3">
+          <Link
+            href="/explore"
+            onClick={() => setOpen(false)}
+            className="block text-sm font-medium text-hueso-dim hover:text-hueso transition-colors py-2"
+          >
+            Explorar
+          </Link>
+          <Link
+            href="/venues"
+            onClick={() => setOpen(false)}
+            className="block text-sm font-medium text-hueso-dim hover:text-hueso transition-colors py-2"
+          >
+            Lugares
+          </Link>
+          <a
+            href="#mapa"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 text-sm font-medium text-hueso-dim hover:text-hueso transition-colors py-2"
+          >
+            <Search size={18} />
+            Buscar en el mapa
+          </a>
+          <Link
+            href="/submit"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2.5 bg-rojo text-white rounded-full text-center font-bold text-sm hover:brightness-110 transition-[filter]"
+          >
+            Posteá tu Chivo
+          </Link>
+        </div>
       </div>
     </nav>
   );

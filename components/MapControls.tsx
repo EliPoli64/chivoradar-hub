@@ -52,7 +52,7 @@ export default function MapControls({
   return (
     <div className="bg-panel/95 backdrop-blur-xl border border-hueso/10 rounded-2xl shadow-2xl p-4 max-h-[55vh] overflow-y-auto md:max-h-none md:overflow-visible">
       {/* búsqueda */}
-      <div className="flex items-center gap-2 bg-cafetal border border-hueso/10 rounded-xl px-3 py-2 focus-within:border-rojo/60 transition-colors">
+      <div className="flex items-center gap-2 bg-cafetal border border-hueso/10 rounded-xl px-3 py-2 focus-within:border-rojo/60 transition-colors w-full">
         <Search size={16} className="text-hueso-dim shrink-0" />
         <input
           type="text"
@@ -94,14 +94,14 @@ export default function MapControls({
         <div
           ref={scrollRef}
           onScroll={updateEdges}
-          className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"
+          className="flex gap-1.5 overflow-x-auto no-scrollbar md:flex-wrap md:overflow-visible pb-1"
         >
           {GENEROS.map((g) => (
             <button
               key={g}
               onClick={() => onGenre(g)}
               aria-pressed={genre === g}
-              className={`px-3 py-1 rounded-full border text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
+              className={`px-3 py-1 rounded-full border text-xs font-medium whitespace-nowrap transition-all active:scale-95 shrink-0 ${
                 genre === g
                   ? "bg-rojo text-white border-rojo"
                   : "border-hueso/15 text-hueso-dim hover:text-hueso hover:border-hueso/40"

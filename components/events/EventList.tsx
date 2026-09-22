@@ -16,7 +16,7 @@ export default function EventList({ events, color }: Props) {
     );
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 w-full">
       {sorted.map((e) => {
         const d = new Date(e.fechaHora);
         const day = d.getDate();

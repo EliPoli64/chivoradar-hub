@@ -14,7 +14,7 @@ export default function Home() {
       </section>
 
       {/* chivos recomendados */}
-      <section className="px-5 md:px-6 py-16 max-w-7xl mx-auto">
+      <section className="px-5 md:px-6 lg:px-8 py-16 max-w-7xl mx-auto">
         <div className="flex justify-between items-end mb-8 gap-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hueso-dim mb-2">

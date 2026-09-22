@@ -123,12 +123,12 @@ export default function LiveMap() {
       )}
 
       {/* hero */}
-      <div className={`absolute top-20 left-4 right-4 md:right-auto md:max-w-md z-20 ${enterClass}`}>
+      <div className={`absolute top-20 left-5 md:left-5 md:max-w-[380px] z-20 ${enterClass}`}>
         <Hero totalEvents={events.length} totalVenues={groups.length} loading={loading} />
       </div>
 
       {/* panel de eventos (desktop) */}
-      <div className="hidden md:block absolute top-28 right-4 z-30 w-[360px]">
+      <div className="hidden md:block absolute top-28 right-4 z-30 w-[380px] max-w-[calc(100vw-2rem)]">
         {selected && (
           <EventSidePanel
             venue={selected}
@@ -164,7 +164,7 @@ export default function LiveMap() {
       </div>
 
       {/* controles (desktop) */}
-      <div className={`hidden md:block absolute bottom-4 left-4 z-20 w-[360px] ${enterClass}`}>
+      <div className={`hidden md:block absolute bottom-4 left-5 z-20 w-[380px] max-w-[calc(100vw-2rem)] ${enterClass}`}>
         <MapControls
           search={search}
           onSearch={setSearch}

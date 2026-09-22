@@ -26,7 +26,7 @@ export default async function VenuesPage({ searchParams }: Props) {
     <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
 
-      <section className="pt-28 pb-16 max-w-7xl mx-auto px-5 md:px-6">
+      <section className="pt-28 pb-16 max-w-7xl mx-auto px-5 md:px-6 lg:px-8">
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hueso-dim">
           Lugares
         </p>
@@ -75,7 +75,7 @@ export default async function VenuesPage({ searchParams }: Props) {
         </div>
 
         {venues.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
             {venues.map((venue) => (
               <VenueCard key={venue.key} venue={venue} />
             ))}

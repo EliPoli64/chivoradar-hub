@@ -72,7 +72,7 @@ export default function ExploreView({ events, region }: Props) {
 
       {/* géneros + búsqueda */}
       <div className="flex flex-col md:flex-row md:items-center gap-3 mt-5">
-        <div className="flex items-center gap-2 bg-cafetal border border-hueso/10 rounded-xl px-3 py-2 focus-within:border-rojo/60 transition-colors md:max-w-xs">
+        <div className="flex items-center gap-2 bg-cafetal border border-hueso/10 rounded-xl px-3 py-2 focus-within:border-rojo/60 transition-colors w-full md:w-auto">
           <Search size={16} className="text-hueso-dim shrink-0" />
           <input
             type="text"
@@ -83,13 +83,13 @@ export default function ExploreView({ events, region }: Props) {
           />
         </div>
 
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar md:flex-wrap md:overflow-visible">
           {GENEROS.map((g) => (
             <button
               key={g}
               onClick={() => setGenre(g)}
               aria-pressed={genre === g}
-              className={`px-3 py-1 rounded-full border text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
+              className={`px-3 py-1 rounded-full border text-xs font-medium whitespace-nowrap transition-all active:scale-95 shrink-0 ${
                 genre === g
                   ? "bg-rojo text-white border-rojo"
                   : "border-hueso/15 text-hueso-dim hover:text-hueso hover:border-hueso/40"
@@ -110,7 +110,7 @@ export default function ExploreView({ events, region }: Props) {
 
       {/* grid */}
       {filtered.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
           {filtered.map((gig, i) => (
             <div
               key={gig.id}

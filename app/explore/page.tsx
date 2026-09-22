@@ -20,7 +20,7 @@ export default async function ExplorePage({ searchParams }: Props) {
     <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
 
-      <section className="pt-28 pb-16 max-w-7xl mx-auto px-5 md:px-6">
+      <section className="pt-28 pb-16 max-w-7xl mx-auto px-5 md:px-6 lg:px-8">
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hueso-dim">
           Explorar
         </p>

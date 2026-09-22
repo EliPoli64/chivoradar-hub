@@ -44,7 +44,7 @@ export default async function VenuePage({ params }: Props) {
     <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
 
-      <section className="pt-28 pb-16 max-w-4xl mx-auto px-5 md:px-6">
+      <section className="pt-28 pb-16 max-w-4xl mx-auto px-5 md:px-6 lg:px-8">
         <Link
           href="/venues"
           className="inline-flex items-center gap-1.5 text-sm text-hueso-dim hover:text-hueso transition-colors"
