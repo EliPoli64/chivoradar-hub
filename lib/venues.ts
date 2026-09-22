@@ -1,5 +1,16 @@
 import { provinceForPoint, PROVINCES } from "./cr-provinces";
 
+export const GENEROS = [
+  "Todos",
+  "Rock",
+  "Electrónica",
+  "Metal",
+  "Jazz",
+  "Reggae",
+  "Indie",
+  "Salsa",
+];
+
 export interface GigEvent {
   id: string;
   titulo: string;
@@ -49,8 +60,10 @@ export function groupEventsByVenue(events: GigEvent[]): VenueGroup[] {
       continue;
     }
 
-    let key = e.venueId || e.venueObj?.slug || "";
     let [lng, lat] = coords as [number, number];
+    if (!isValidCrPoint(lng, lat)) continue;
+
+    let key = e.venueId || e.venueObj?.slug || "";
 
     if (!key) {
       // agrupar por coordenadas exactas como último recurso
@@ -92,6 +105,17 @@ export const CR_BOUNDS: [[number, number], [number, number]] = [
   [8.03, -85.98],
   [11.23, -82.4],
 ];
+
+const CR_MARGIN = { lngMin: -86.5, lngMax: -81.9, latMin: 7.8, latMax: 11.5 };
+
+export function isValidCrPoint(lng: number, lat: number): boolean {
+  return (
+    lng >= CR_MARGIN.lngMin &&
+    lng <= CR_MARGIN.lngMax &&
+    lat >= CR_MARGIN.latMin &&
+    lat <= CR_MARGIN.latMax
+  );
+}
 
 export function formatFechaHora(iso: string): string {
   const d = new Date(iso);

@@ -1,10 +1,26 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/db/mongodb';
 import Evento from '@/models/evento';
-import TierPrecio from '@/models/tierPrecio';
-import Venue from '@/models/venue';
 
-export async function GET(request: Request) {
+interface EventoRaw {
+  _id: string;
+  titulo: string;
+  categoria: string;
+  fechaHora: Date;
+  descripcion: string | null;
+  link: string;
+  urlImagen: string | null;
+  venueId?: string | null;
+  venueObj?: {
+    nombre?: string;
+    slug?: string;
+    direccion?: string | null;
+    coordinates?: number[] | null;
+  } | null;
+  tiersPrecio?: { nombre: string; precio: number; moneda: string }[];
+}
+
+export async function GET() {
   try {
     await connectDB();
     
@@ -74,7 +90,7 @@ export async function GET(request: Request) {
 
     console.log('Found events:', JSON.stringify(eventos, null, 2));
 
-    const formattedEvents = eventos.map((event: any) => {
+    const formattedEvents = eventos.map((event: EventoRaw) => {
       let fechaCorrecta = event.fechaHora;
       
       if (event.link && event.link.includes('eticket.cr')) {
