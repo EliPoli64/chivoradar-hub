@@ -5,16 +5,19 @@ import { formatHora, formatPrecio } from "@/lib/venues";
 
 interface Props {
   venue: VenueGroup;
+  closing?: boolean;
   onClose: () => void;
 }
 
-export default function EventSidePanel({ venue, onClose }: Props) {
+export default function EventSidePanel({ venue, closing = false, onClose }: Props) {
   const count = venue.events.length;
 
   return (
     <div
       data-testid="side-panel"
-      className="flex flex-col h-full max-h-[65vh] bg-panel/95 backdrop-blur-xl border border-hueso/10 rounded-2xl shadow-2xl overflow-hidden"
+      className={`flex flex-col h-full max-h-[70vh] bg-panel/95 backdrop-blur-xl border border-hueso/10 rounded-2xl shadow-2xl overflow-hidden ${
+        closing ? "anim-panel-out" : "anim-panel-in"
+      }`}
     >
       {/* encabezado del lugar */}
       <div className="px-5 pt-4 pb-3 border-b border-hueso/10">

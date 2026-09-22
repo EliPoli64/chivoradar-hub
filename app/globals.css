@@ -115,6 +115,75 @@ body {
   pointer-events: none;
 }
 
+/* --- entrances --- */
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes panelInRight {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes panelInUp {
+  from {
+    opacity: 0;
+    transform: translateY(64px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes panelOutRight {
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+@keyframes panelOutUp {
+  to {
+    opacity: 0;
+    transform: translateY(56px);
+  }
+}
+
+.anim-rise {
+  animation: riseIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-panel-in {
+  animation: panelInUp 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-panel-out {
+  animation: panelOutUp 0.2s ease-in both;
+}
+
+@media (min-width: 768px) {
+  .anim-panel-in {
+    animation-name: panelInRight;
+  }
+  .anim-panel-out {
+    animation-name: panelOutRight;
+  }
+}
+
 /* faint full-map radar sweep */
 @keyframes blipBob {
   0%,

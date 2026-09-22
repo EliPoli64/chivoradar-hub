@@ -1,11 +1,13 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { MOCK_EVENTS } from "@/lib/mockEvents";
 import { groupEventsByVenue, type GigEvent, type VenueGroup } from "@/lib/venues";
 import Hero from "@/components/Hero";
 import MapControls from "@/components/MapControls";
 import EventSidePanel from "@/components/events/EventSidePanel";
+
+const CLOSE_MS = 200;
 
 const MapSkeleton = () => (
   <div className="w-full h-full bg-cafetal flex flex-col items-center justify-center gap-5">
@@ -28,7 +30,20 @@ export default function LiveMap() {
   const [genre, setGenre] = useState("Todos");
   const [province, setProvince] = useState<string | null>(null);
   const [selected, setSelected] = useState<VenueGroup | null>(null);
+  const [closing, setClosing] = useState(false);
   const [resetTick, setResetTick] = useState(0);
+  const [booted, setBooted] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedRef = useRef<VenueGroup | null>(null);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setBooted(true), 900);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -56,11 +71,33 @@ export default function LiveMap() {
 
   const groups = useMemo(() => groupEventsByVenue(events), [events]);
 
+  // cerrar el panel con una salida animada antes de desmontarlo
+  const handleSelect = useCallback((venue: VenueGroup | null) => {
+    if (venue) {
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+        closeTimer.current = null;
+      }
+      setClosing(false);
+      setSelected(venue);
+      return;
+    }
+    if (!selectedRef.current || closing) return;
+    setClosing(true);
+    closeTimer.current = setTimeout(() => {
+      setSelected(null);
+      setClosing(false);
+      closeTimer.current = null;
+    }, CLOSE_MS);
+  }, [closing]);
+
   const handleReset = useCallback(() => {
-    setSelected(null);
+    handleSelect(null);
     setProvince(null);
     setResetTick((t) => t + 1);
-  }, []);
+  }, [handleSelect]);
+
+  const enterClass = booted ? "" : "anim-rise";
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-cafetal">
@@ -74,7 +111,7 @@ export default function LiveMap() {
           province={province}
           selectedVenueId={selected?.key ?? null}
           resetTick={resetTick}
-          onSelectVenue={setSelected}
+          onSelectVenue={handleSelect}
         />
       </div>
 
@@ -85,38 +122,48 @@ export default function LiveMap() {
       )}
 
       {/* hero */}
-      <div className="absolute top-20 left-4 right-4 md:right-auto md:max-w-md z-20">
+      <div className={`absolute top-20 left-4 right-4 md:right-auto md:max-w-md z-20 ${enterClass}`}>
         <Hero totalEvents={events.length} totalVenues={groups.length} loading={loading} />
       </div>
 
-{/* panel de eventos (desktop) */}
+      {/* panel de eventos (desktop) */}
       <div className="hidden md:block absolute top-28 right-4 z-30 w-[360px]">
         {selected && (
-          <EventSidePanel venue={selected} onClose={() => setSelected(null)} />
+          <EventSidePanel
+            venue={selected}
+            closing={closing}
+            onClose={() => handleSelect(null)}
+          />
         )}
       </div>
 
       {/* hoja inferior (mobile): controles o lugar elegido */}
       <div className="md:hidden absolute inset-x-4 bottom-4 z-30">
         {selected ? (
-          <EventSidePanel venue={selected} onClose={() => setSelected(null)} />
-        ) : (
-          <MapControls
-            search={search}
-            onSearch={setSearch}
-            genre={genre}
-            onGenre={setGenre}
-            province={province}
-            onProvince={setProvince}
-            onReset={handleReset}
-            totalEvents={events.length}
-            totalVenues={groups.length}
+          <EventSidePanel
+            venue={selected}
+            closing={closing}
+            onClose={() => handleSelect(null)}
           />
+        ) : (
+          <div className={enterClass}>
+            <MapControls
+              search={search}
+              onSearch={setSearch}
+              genre={genre}
+              onGenre={setGenre}
+              province={province}
+              onProvince={setProvince}
+              onReset={handleReset}
+              totalEvents={events.length}
+              totalVenues={groups.length}
+            />
+          </div>
         )}
       </div>
 
       {/* controles (desktop) */}
-      <div className="hidden md:block absolute bottom-4 left-4 z-20 w-[360px]">
+      <div className={`hidden md:block absolute bottom-4 left-4 z-20 w-[360px] ${enterClass}`}>
         <MapControls
           search={search}
           onSearch={setSearch}

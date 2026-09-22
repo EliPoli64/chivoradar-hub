@@ -34,18 +34,23 @@ export default function EventGrid() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {gigs.slice(0, 12).map((gig) => (
-        <EventCard
+      {gigs.slice(0, 12).map((gig, i) => (
+        <div
           key={gig.id}
-          title={gig.titulo}
-          artist={gig.artista}
-          venue={gig.venue}
-          date={gig.date}
-          genre={gig.categoria}
-          image={gig.urlImagen}
-          coordinates={gig.venueObj?.coordinates}
-          link={gig.link}
-        />
+          className="anim-rise"
+          style={{ animationDelay: `${Math.min(i * 70, 420)}ms` }}
+        >
+          <EventCard
+            title={gig.titulo}
+            artist={gig.artista}
+            venue={gig.venue}
+            date={gig.date}
+            genre={gig.categoria}
+            image={gig.urlImagen}
+            coordinates={gig.venueObj?.coordinates}
+            link={gig.link}
+          />
+        </div>
       ))}
 
       <div className="flex flex-col items-center justify-center border-2 border-dashed border-hueso/10 rounded-2xl p-8 text-center bg-panel/30">
