@@ -1,26 +1,208 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cafetal: #16120d;
+  --panel: #221a11;
+  --panel-soft: #2b2218;
+  --hueso: #f5efe4;
+  --hueso-dim: #a79e8e;
+  --rojo: #e6323f;
+  --dorado: #f5b301;
+  --guaria: #9d5cff;
+  --rosa: #f472b6;
+  --turquesa: #2dd4bf;
+  --pacifico: #38bdf8;
+  --caribe: #34d399;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--cafetal);
+  --color-foreground: var(--hueso);
+  --color-cafetal: var(--cafetal);
+  --color-panel: var(--panel);
+  --color-panel-soft: var(--panel-soft);
+  --color-hueso: var(--hueso);
+  --color-hueso-dim: var(--hueso-dim);
+  --color-rojo: var(--rojo);
+  --color-dorado: var(--dorado);
+  --color-guaria: var(--guaria);
+  --color-rosa: var(--rosa);
+  --color-turquesa: var(--turquesa);
+  --color-pacifico: var(--pacifico);
+  --color-caribe: var(--caribe);
+  --font-display: var(--font-alfa);
+  --font-sans: var(--font-karla);
+  --font-mono: var(--font-plex);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--cafetal);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cafetal);
+  color: var(--hueso);
+  font-family: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Painted-oxcart radial mark */
+.carreta-mark {
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      var(--dorado) 0deg 22.5deg,
+      var(--rojo) 22.5deg 45deg,
+      var(--turquesa) 45deg 67.5deg,
+      var(--guaria) 67.5deg 90deg,
+      var(--rosa) 90deg 112.5deg,
+      var(--caribe) 112.5deg 135deg,
+      var(--pacifico) 135deg 157.5deg,
+      var(--dorado) 157.5deg 180deg
+    ),
+    var(--rojo);
+  background-blend-mode: normal;
+  border-radius: 50%;
+}
+
+/* --- carreta wheel marker --- */
+.carreta-wheel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.carreta-wheel .wheel-spokes {
+  position: absolute;
+  animation: none;
+  pointer-events: none;
+}
+
+.carreta-wheel.selected .wheel-spokes {
+  animation: carretaSpin 5s linear infinite;
+}
+
+.carreta-wheel.selected .radar-ring {
+  animation: dropRing 1.8s ease-out infinite;
+}
+
+@keyframes carretaSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* radar drop-ring on selected venue */
+@keyframes dropRing {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.radar-ring {
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: dropRing 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+/* faint full-map radar sweep */
+@keyframes blipBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.blip-bob {
+  animation: blipBob 2.4s ease-in-out infinite;
+}
+
+/* cluster bubble */
+.cluster-bubble {
+  transition: transform 0.3s ease;
+}
+
+.cluster-bubble:hover {
+  transform: scale(1.08);
+}
+
+/* focus visibility */
+:focus-visible {
+  outline: 2px solid var(--rojo);
+  outline-offset: 2px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Leaflet polish */
+.leaflet-container {
+  font-family: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--panel);
+  color: var(--hueso);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.leaflet-popup-tip {
+  background: var(--panel);
+}
+
+.leaflet-control-attribution {
+  background: rgba(22, 18, 13, 0.7) !important;
+  color: var(--hueso-dim) !important;
+  font-family: var(--font-plex), ui-monospace, monospace !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--hueso-dim) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--panel) !important;
+  color: var(--hueso) !important;
+  border: 1px solid rgba(245, 239, 228, 0.12) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--rojo) !important;
+  color: #fff !important;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .carreta-wheel.selected .wheel-spokes,
+  .carreta-wheel.selected .radar-ring,
+  .blip-bob {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -1,31 +1,30 @@
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
 import LiveMap from "@/components/LiveMap";
 import EventGrid from "@/components/events/EventGrid";
 import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-neon-green selection:text-black">
+    <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
-      
-      {/* hero */}
-      <section className="px-6 pt-24 pb-12 md:pt-32">
-        <Hero />
+
+      {/* mapa como protagonista */}
+      <section id="mapa" className="h-[calc(100dvh-64px)] md:h-[86vh] min-h-[520px]">
+        <LiveMap />
       </section>
 
-      {/* mapa interactivo */}
-      <section className="px-4 py-8 mx-auto">
-        <div className="rounded-3xl w-[1020px] border border-white/10 bg-zinc-900/50 p-2 overflow-hidden mx-auto">
-          <LiveMap />
-        </div>
-      </section>
-
-      {/* grid de eventos recomendados */}
-      <section className="px-6 py-12 max-w-7xl mx-auto">
-        <div className="flex justify-between items-end mb-8">
-          <h2 className="text-3xl font-bold tracking-tighter">Cerca Tuyo</h2>
-          <button className="text-neon-green hover:underline">Ver todos en San José →</button>
+      {/* chivos recomendados */}
+      <section className="px-5 md:px-6 py-16 max-w-7xl mx-auto">
+        <div className="flex justify-between items-end mb-8 gap-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hueso-dim mb-2">
+              Próximamente
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl text-hueso">Cerca Tuyo</h2>
+          </div>
+          <button className="text-rojo hover:underline text-sm font-bold whitespace-nowrap">
+            Ver todos en San José →
+          </button>
         </div>
         <EventGrid />
       </section>

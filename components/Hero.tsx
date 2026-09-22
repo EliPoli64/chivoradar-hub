@@ -1,25 +1,51 @@
-import { Search, Navigation } from 'lucide-react';
+interface HeroProps {
+  totalEvents: number;
+  totalVenues: number;
+  loading: boolean;
+}
 
-export default function Hero() {
+export default function Hero({ totalEvents, totalVenues, loading }: HeroProps) {
   return (
-    <div className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto">
-      <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase">
-        Encuentre su <span className="text-neon-green underline decoration-4">próxima velada.</span>
+    <div className="bg-panel/90 backdrop-blur-xl border border-hueso/10 rounded-2xl shadow-2xl p-5 max-w-md">
+      <div className="flex items-center gap-2">
+        <span className="carreta-mark w-4 h-4" aria-hidden="true" />
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hueso-dim">
+          Radar de la música en vivo
+        </p>
+      </div>
+
+      <h1 className="font-display text-4xl md:text-5xl leading-[0.95] text-hueso mt-3">
+        La noche
+        <br />
+        tiene <span className="text-rojo">mapa.</span>
       </h1>
-      <p className="text-zinc-400 text-lg md:text-xl max-w-2xl">
-        El mejor mapa para música en vivo en Costa Rica. Desde bandas de garaje subterráneas hasta tours de estadio.
+
+      <p className="hero-sub hidden sm:block text-sm text-hueso-dim mt-3 leading-relaxed">
+        Del garaje al estadio, de San José a Limón. Encontrá tu próximo chivo en
+        el mapa y salí esta noche.
       </p>
-      
-      <div className="flex w-full max-w-md items-center bg-zinc-900 border border-white/10 rounded-2xl p-2 shadow-neon-glow">
-        <div className="pl-4 text-zinc-500"><Search size={20} /></div>
-        <input 
-          type="text" 
-          placeholder="Buscar por artista, género, o lugar..." 
-          className="bg-transparent border-none outline-none w-full px-4 text-white placeholder:text-zinc-600"
-        />
-        <button className="bg-white text-black p-3 rounded-xl hover:bg-neon-green transition-colors">
-          <Navigation size={20} />
-        </button>
+
+      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-hueso/10">
+        <span className="relative flex h-2 w-2">
+          {!loading && (
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rojo opacity-60" />
+          )}
+          <span
+            className={`relative inline-flex rounded-full h-2 w-2 bg-rojo ${
+              loading ? "animate-pulse" : ""
+            }`}
+          />
+        </span>
+        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-hueso-dim">
+          {loading ? (
+            "Sincronizando el radar…"
+          ) : (
+            <>
+              <span className="text-hueso font-bold">{totalEvents}</span> chivos ·{" "}
+              <span className="text-hueso font-bold">{totalVenues}</span> lugares en vivo
+            </>
+          )}
+        </p>
       </div>
     </div>
   );

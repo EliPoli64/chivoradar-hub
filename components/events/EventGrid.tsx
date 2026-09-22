@@ -1,52 +1,61 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import EventCard from "./EventCard";
 
 interface Evento {
   id: string;
-  title: string;
-  artist: string;
+  titulo: string;
+  artista: string;
   venue: string;
   date: string;
-  genre: string;
-  image: string;
+  categoria: string;
+  urlImagen: string;
+  link?: string;
+  venueObj?: { coordinates?: number[] | null };
 }
 
 export default function EventGrid() {
-  var gigs: Evento[] = [];
+  const [gigs, setGigs] = useState<Evento[]>([]);
 
   useEffect(() => {
-    const fetchEventos = async () => { 
+    const fetchEventos = async () => {
       try {
-        const response = await fetch('/api/fetch');
-        gigs = await response.json();
-        console.log('Fetched data:', gigs);
-        
+        const response = await fetch("/api/fetch");
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setGigs(data);
+        }
       } catch (error) {
-        console.error('Error fetching eventos:', error);
+        console.error("Error fetching eventos:", error);
       }
-    }
+    };
     fetchEventos();
   }, []);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {gigs.map((gig) => (
+      {gigs.slice(0, 12).map((gig) => (
         <EventCard
           key={gig.id}
-          title={gig.title}
-          artist={gig.artist}
+          title={gig.titulo}
+          artist={gig.artista}
           venue={gig.venue}
           date={gig.date}
-          genre={gig.genre}
-          image={gig.image}
+          genre={gig.categoria}
+          image={gig.urlImagen}
+          coordinates={gig.venueObj?.coordinates}
+          link={gig.link}
         />
       ))}
 
-      <div className="flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl p-8 text-center bg-zinc-900/30">
-        <p className="text-zinc-500 mb-4">¿Su chivo no está en el radar?</p>
-        <button className="text-neon-green font-bold hover:scale-105 transition-transform">
+      <div className="flex flex-col items-center justify-center border-2 border-dashed border-hueso/10 rounded-2xl p-8 text-center bg-panel/30">
+        <p className="text-hueso-dim mb-4">¿Su chivo no está en el radar?</p>
+        <a
+          href="/submit"
+          className="text-rojo font-bold hover:underline transition-colors"
+        >
           + Agregá tu Chivo
-        </button>
+        </a>
       </div>
     </div>
   );

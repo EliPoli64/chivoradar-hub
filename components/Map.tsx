@@ -1,232 +1,200 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { LeafletMouseEvent, Map as LeafletMap } from "leaflet";
+import { useMapEvents } from "react-leaflet";
+import { CR_BOUNDS, type VenueGroup } from "@/lib/venues";
+import { PROVINCES } from "@/lib/cr-provinces";
 
-const clusterStyles = `
-  @keyframes clusterPulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.05);
-      opacity: 0.9;
-    }
-  }
+interface LeafletBundle {
+  MapContainer: typeof import("react-leaflet").MapContainer;
+  Marker: typeof import("react-leaflet").Marker;
+  TileLayer: typeof import("react-leaflet").TileLayer;
+  ZoomControl: typeof import("react-leaflet").ZoomControl;
+  MarkerClusterGroup: typeof import("react-leaflet-cluster").default;
+  L: typeof import("leaflet");
+}
 
-  @keyframes clusterBounce {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.08);
-    }
-  }
+interface ClusterLike {
+  getChildCount: () => number;
+}
 
-  .cluster-bubble {
-    animation: clusterBounce 2s ease-in-out infinite;
-  }
+function MapClickController({ onMapClick }: { onMapClick: () => void }) {
+  useMapEvents({
+    click: (e: LeafletMouseEvent) => {
+      const target = e.originalEvent.target as HTMLElement | undefined;
+      if (target?.closest?.(".leaflet-marker-icon")) return;
+      onMapClick();
+    },
+  });
+  return null;
+}
 
-  .cluster-bubble:hover {
-    animation: clusterPulse 0.6s ease-in-out !important;
-  }
+interface MapProps {
+  groups: VenueGroup[];
+  loading: boolean;
+  search: string;
+  genre: string;
+  province: string | null;
+  selectedVenueId: string | null;
+  resetTick: number;
+  onSelectVenue: (venue: VenueGroup | null) => void;
+}
 
-  .cluster-inner {
-    transition: all 0.3s ease;
-  }
-`;
+function markerHtml(venue: VenueGroup, selected: boolean, matching: boolean) {
+  const count = venue.events.length;
+  const size = 46;
+  const fontSize = count > 99 ? 8 : count > 9 ? 10 : 13;
+  const ring = selected
+    ? `<div class="radar-ring" style="color:${venue.color};"></div>`
+    : "";
+  return `
+    <div class="carreta-wheel${selected ? " selected" : ""}" style="width:${size}px;height:${size}px;${matching ? "" : "opacity:0.3;"}">
+      <div class="wheel-body" style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%, ${venue.color}, rgba(0,0,0,0.55) 150%);box-shadow:0 0 0 2px rgba(245,239,228,0.85), 0 6px 16px rgba(0,0,0,0.35);"></div>
+      <div class="wheel-spokes" style="position:absolute;inset:9%;border-radius:50%;background:repeating-conic-gradient(from 0deg, rgba(245,239,228,0.55) 0deg 5deg, transparent 5deg 45deg);"></div>
+      <div style="position:absolute;inset:25%;border-radius:50%;background:#f5efe4;box-shadow:inset 0 1px 3px rgba(0,0,0,0.25);"></div>
+      <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-plex);font-weight:700;font-size:${fontSize}px;color:#16120d;line-height:1;">${count}</span>
+      ${ring}
+    </div>`;
+}
 
-export default function MapaChivos({ position, zoom }: any) {
-  const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [MapComponents, setMapComponents] = useState<any>(null);
-  const [customIcon, setCustomIcon] = useState<any>(null);
-  const [mapReady, setMapReady] = useState(false);
-
-  useEffect(() => {
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = clusterStyles;
-    document.head.appendChild(styleSheet);
-    return () => styleSheet.remove();
-  }, []);
+export default function MapaChivos({
+  groups,
+  loading,
+  search,
+  genre,
+  province,
+  selectedVenueId,
+  resetTick,
+  onSelectVenue,
+}: MapProps) {
+  const [MapComponents, setMapComponents] = useState<LeafletBundle | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const fitted = useRef(false);
 
   useEffect(() => {
     const loadMapLibraries = async () => {
-      const { MapContainer, Marker, Popup, TileLayer } = await import("react-leaflet");
+      const { MapContainer, Marker, TileLayer, ZoomControl } = await import("react-leaflet");
       const L = await import("leaflet");
       const markerClusterGroup = await import("react-leaflet-cluster");
-      
       await import("leaflet/dist/leaflet.css");
-      
-      const icon = new L.default.Icon({
-        iconUrl: "https://www.freepnglogos.com/uploads/pin-png/map-pin-png-apex-dance-studio-16.png",
-        iconRetinaUrl: "https://www.freepnglogos.com/uploads/pin-png/map-pin-png-apex-dance-studio-16.png",
-        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-        iconSize: [50, 50],
-        iconAnchor: [25, 50],
-      });
-      
-      setMapComponents({ MapContainer, Marker, Popup, TileLayer, MarkerClusterGroup: markerClusterGroup.default });
-      setCustomIcon(icon);
-    };
 
+      setMapComponents({
+        MapContainer,
+        Marker,
+        TileLayer,
+        ZoomControl,
+        MarkerClusterGroup: markerClusterGroup.default,
+        L,
+      });
+    };
     loadMapLibraries();
   }, []);
 
+  // volar a una provincia cuando se elige en el panel
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/fetch");
-        const json = await response.json();
-        setEvents(json);
-      } catch (err) {
-        console.error("Error loading map data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const map = mapRef.current;
+    if (!map || !province) return;
+    const prov = PROVINCES.find((p) => p.name === province);
+    if (prov) {
+      map.flyTo(prov.centroid as [number, number], 9, { duration: 0.9 });
+    }
+  }, [province]);
 
-    fetchEvents();
-  }, []);
-
+  // botón "ver todo": volver al país entero sin alejar tanto
   useEffect(() => {
-    if (MapComponents && customIcon && !loading) {
-      setMapReady(true);
-    }
-  }, [MapComponents, customIcon, loading]);
+    const map = mapRef.current;
+    if (!map || resetTick === 0) return;
+    map.flyTo([9.75, -84.2], 9, { duration: 0.9 });
+  }, [resetTick]);
 
-  const validEvents = events.filter(evento => {
-    const hasCoordinates = evento.venueObj?.coordinates && 
-                          Array.isArray(evento.venueObj.coordinates) && 
-                          evento.venueObj.coordinates.length === 2 &&
-                          evento.venueObj.coordinates[0] !== null &&
-                          evento.venueObj.coordinates[1] !== null;
-    
-    return hasCoordinates;
-  });
+  if (!MapComponents || loading) return null;
 
-  const groupedEvents = validEvents.reduce((acc: any, evento) => {
-    const coordKey = `${evento.venueObj.coordinates[0]},${evento.venueObj.coordinates[1]}`;
-    if (!acc[coordKey]) {
-      acc[coordKey] = [];
-    }
-    acc[coordKey].push(evento);
-    return acc;
-  }, {});
+  const { MapContainer, Marker, TileLayer, ZoomControl, MarkerClusterGroup, L } =
+    MapComponents;
 
-  const createClusterCustomIcon = (cluster: any) => {
-    const L = require("leaflet");
+  const createClusterIcon = (cluster: ClusterLike) => {
     const count = cluster.getChildCount();
-    let size = 40;
-    let backgroundColor = "#3b82f6"; // Light blue
-    let borderColor = "#1e40af"; // Dark blue for border
-    
-    if (count > 10) {
-      size = 56;
-      backgroundColor = "#1e3a8a"; // Dark blue
-      borderColor = "#0f172a"; // Darker border
-    } else if (count > 5) {
-      size = 48;
-      backgroundColor = "#1e40af"; // Medium blue
-      borderColor = "#1e3a8a"; // Dark blue border
-    } else if (count > 1) {
-      size = 40;
-      backgroundColor = "#3b82f6"; // Light blue
-      borderColor = "#1e40af"; // Medium border
-    }
-    
+    const size = count > 10 ? 60 : count > 5 ? 52 : 44;
     return L.divIcon({
-      html: `<div class="cluster-bubble" style="background: linear-gradient(135deg, ${backgroundColor} 0%, ${borderColor} 100%); width: ${size}px; height: ${size}px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #60a5fa; box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3), 0 8px 16px rgba(30, 58, 138, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1);">
-              <div class="cluster-inner" style="text-align: center;">
-                <span style="color: white; font-weight: 900; font-size: ${size > 45 ? '18px' : '15px'}; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);">${count}</span>
-              </div>
-            </div>`,
+      html: `<div class="cluster-bubble" style="width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #f5b301, #e6323f 75%);display:flex;align-items:center;justify-content:center;border:3px solid rgba(245,239,228,0.9);box-shadow:0 8px 20px rgba(0,0,0,0.4);">
+        <span style="font-family:var(--font-plex);font-weight:700;font-size:${size > 45 ? 18 : 15}px;color:#16120d;line-height:1;">${count}</span>
+      </div>`,
       className: "custom-cluster-icon",
       iconSize: L.point(size, size),
     });
   };
 
-  if (!mapReady) {
-    return (
-      <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-neon-green mb-2"></div>
-          <p className="text-sm text-zinc-400">Cargando mapa...</p>
-        </div>
-      </div>
-    );
-  }
+  const venueMatches = (venue: VenueGroup) => {
+    const q = search.trim().toLowerCase();
+    const qOk =
+      !q ||
+      venue.events.some((e) =>
+        `${e.artista} ${e.titulo} ${e.venueObj?.nombre} ${e.venue ?? ""}`
+          .toLowerCase()
+          .includes(q)
+      );
+    const gOk =
+      !genre || genre === "Todos" || venue.events.some((e) => e.categoria === genre);
+    const pOk = !province || venue.province === province;
+    return qOk && gOk && pOk;
+  };
 
   return (
-    <div className="w-full h-full">
-    <MapComponents.MapContainer 
-      center={[9.800090306914088, -84.03119843292991]} 
-      zoom={8} 
-      scrollWheelZoom={true} 
+    <MapContainer
+      ref={(m) => {
+        mapRef.current = m;
+        if (m && !fitted.current) {
+          fitted.current = true;
+          m.fitBounds(CR_BOUNDS, { padding: [24, 24] });
+        }
+      }}
+      center={[9.75, -84.2]}
+      zoom={8}
+      zoomControl={false}
+      scrollWheelZoom
       className="w-full h-full"
-      style={{ background: "#555561" }}
+      style={{ background: "#efe7d8" }}
     >
-      <MapComponents.TileLayer
-        url={`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${process.env.NEXT_PUBLIC_CARTO_API_KEY}`}
+      <MapClickController onMapClick={() => onSelectVenue(null)} />
+      <TileLayer
+        url={`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${process.env.NEXT_PUBLIC_CARTO_API_KEY}`}
       />
 
-      <MapComponents.MarkerClusterGroup
+      <ZoomControl position="bottomright" />
+
+      <MarkerClusterGroup
         chunkedLoading
-        maxClusterRadius={80}
-        iconCreateFunction={createClusterCustomIcon}
+        maxClusterRadius={70}
+        iconCreateFunction={createClusterIcon}
         showCoverageOnHover={false}
-        spiderfyOnMaxZoom={true}
-        spiderLegPolylineOptions={{
-          weight: 1.5,
-          color: "#10b981",
-          opacity: 0.5
-        }}
+        spiderfyOnMaxZoom
       >
-        {validEvents.map((evento) => (
-          <MapComponents.Marker 
-            key={evento.id} 
-            position={[evento.venueObj.coordinates[1], evento.venueObj.coordinates[0]]} 
-            icon={customIcon}
-          >
-            <MapComponents.Popup>
-              <div className="p-2 max-w-xs">
-                <p className="text-xs font-black uppercase text-neon-green mb-1">{evento.artista}</p>
-                <h4 className="font-bold text-sm leading-tight mb-1">{evento.titulo}</h4>
-                <p className="text-xs text-zinc-500 mb-2">{evento.venueObj?.nombre}</p>
-                {groupedEvents[`${evento.venueObj.coordinates[0]},${evento.venueObj.coordinates[1]}`]?.length > 1 && (
-                  <div className="mb-2 text-xs text-neon-green">
-                    🎫 {groupedEvents[`${evento.venueObj.coordinates[0]},${evento.venueObj.coordinates[1]}`].length} eventos en este lugar
-                  </div>
-                )}
-                <a 
-                  href={evento.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block mt-1 text-center bg-zinc-900 text-white text-[10px] py-1.5 rounded uppercase font-bold hover:bg-zinc-700 transition-colors"
-                >
-                  Ver Info
-                </a>
-              </div>
-            </MapComponents.Popup>
-          </MapComponents.Marker>
-        ))}
-      </MapComponents.MarkerClusterGroup>
-    </MapComponents.MapContainer>
-    {/* overlay */}
-      <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end z-[500]">
-        <div className="bg-black/60 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-            </span>
-            <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">Radar en Vivo</p>
-          </div>
-          <p className="text-2xl font-black text-white italic tracking-tighter">
-            {events.length} <span className="text-neon-green">CHIVOS</span> ENCONTRADOS
-          </p>
-        </div>
-      </div>
-    </div>
+        {groups.map((venue) => {
+          const selected = selectedVenueId === venue.key;
+          const matching = venueMatches(venue);
+          return (
+            <Marker
+              key={venue.key}
+              position={[venue.position[1], venue.position[0]]}
+              icon={L.divIcon({
+                html: markerHtml(venue, selected, matching),
+                className: "custom-marker-icon",
+                iconSize: L.point(46, 46),
+                iconAnchor: L.point(23, 23),
+              })}
+              eventHandlers={{
+                click: (e: LeafletMouseEvent) => {
+                  e.originalEvent.stopPropagation();
+                  onSelectVenue(venue);
+                  mapRef.current?.flyTo([venue.position[1], venue.position[0]], 13, {
+                    duration: 0.7,
+                  });
+                },
+              }}
+            />
+          );
+        })}
+      </MarkerClusterGroup>
+    </MapContainer>
   );
 }
