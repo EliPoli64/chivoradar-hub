@@ -1,0 +1,173 @@
+import { connectDB } from '@/db/mongodb';
+import Evento from '@/models/evento';
+import { provinceForPoint } from '@/lib/cr-provinces';
+import { KEYS, getCached, setCached, getTTL } from '@/lib/redis';
+import type { GigEvent } from '@/lib/venues';
+
+interface EventoRaw {
+  _id: string;
+  titulo: string;
+  categoria: string;
+  fechaHora: Date;
+  descripcion: string | null;
+  link: string;
+  urlImagen: string | null;
+  venueObj?: {
+    nombre?: string;
+    slug?: string;
+    direccion?: string | null;
+    coordinates?: number[] | null;
+  } | null;
+  tiersPrecio?: { nombre: string; precio: number; moneda: string }[];
+}
+
+export function formatEvent(event: EventoRaw): GigEvent {
+  let fechaCorrecta = event.fechaHora;
+
+  if (event.link && event.link.includes('eticket.cr')) {
+    const urlParams = new URLSearchParams(event.link.split('?')[1]);
+    const idevento = urlParams.get('idevento');
+
+    if (idevento === '9339') {
+      fechaCorrecta = new Date('2026-05-31T17:05:00');
+    }
+  }
+
+  return {
+    id: event._id,
+    titulo: event.titulo,
+    artista: event.titulo.split(' - ')[0] || event.titulo,
+    categoria: event.categoria,
+    fechaHora: fechaCorrecta.toISOString(),
+    descripcion: event.descripcion || '',
+    link: event.link,
+    urlImagen: event.urlImagen || '',
+    venueObj: {
+      nombre: event.venueObj?.nombre || 'Lugar por confirmar',
+      slug: event.venueObj?.slug,
+      direccion: event.venueObj?.direccion ?? null,
+      coordinates: event.venueObj?.coordinates ?? null,
+    },
+    venue: event.venueObj?.nombre || (event.titulo.includes('ANTIGUA ADUANA') ? 'Antigua Aduana' : 'Lugar por confirmar'),
+    date: new Date(fechaCorrecta).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).replace(/\./g, ''),
+    tiersPrecio: event.tiersPrecio || [],
+  };
+}
+
+async function loadEventsFromMongo(): Promise<GigEvent[]> {
+  await connectDB();
+
+  const eventos = await Evento.aggregate<EventoRaw>([
+    {
+      $match: {
+        fechaHora: { $exists: true, $ne: null },
+      },
+    },
+    {
+      $lookup: {
+        from: 'venues',
+        localField: 'ubicacion',
+        foreignField: '_id',
+        as: 'venueInfo',
+      },
+    },
+    {
+      $unwind: {
+        path: '$venueInfo',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: 'tiersprecios',
+        localField: '_id',
+        foreignField: 'evento',
+        as: 'tiersPrecio',
+      },
+    },
+    {
+      $project: {
+        _id: { $toString: '$_id' },
+        titulo: 1,
+        categoria: 1,
+        fechaHora: 1,
+        descripcion: 1,
+        link: 1,
+        urlImagen: 1,
+        venueId: { $toString: '$venueInfo._id' },
+        venueObj: {
+          nombre: '$venueInfo.nombre',
+          slug: '$venueInfo.slug',
+          direccion: '$venueInfo.direccion',
+          coordinates: '$venueInfo.ubicacion.coordinates',
+          latitud: { $arrayElemAt: ['$venueInfo.ubicacion.coordinates', 1] },
+          longitud: { $arrayElemAt: ['$venueInfo.ubicacion.coordinates', 0] },
+        },
+        tiersPrecio: {
+          $map: {
+            input: '$tiersPrecio',
+            as: 'tier',
+            in: {
+              nombre: '$$tier.nombre',
+              precio: '$$tier.precio',
+              moneda: '$$tier.moneda',
+            },
+          },
+        },
+      },
+    },
+    {
+      $sort: { fechaHora: 1 },
+    },
+  ]);
+
+  return eventos.map(formatEvent);
+}
+
+export async function getEventsFeed(): Promise<GigEvent[]> {
+  const key = KEYS.events;
+  const cached = await getCached<GigEvent[]>(key);
+  if (cached) return cached;
+
+  const events = await loadEventsFromMongo();
+  await setCached(key, events, getTTL());
+  return events;
+}
+
+export async function getVenueEvents(slug: string): Promise<GigEvent[]> {
+  const key = KEYS.venue(slug);
+  const cached = await getCached<GigEvent[]>(key);
+  if (cached) return cached;
+
+  const feed = await getEventsFeed();
+  const events = feed.filter(
+    (e) => e.venueObj?.slug === slug || e.venueId === slug || e.venue === slug,
+  );
+  await setCached(key, events, getTTL());
+  return events;
+}
+
+function normalize(s: string): string {
+  return s.trim().toLowerCase();
+}
+
+export async function getProvinceEvents(slug: string): Promise<GigEvent[]> {
+  const key = KEYS.province(slug);
+  const cached = await getCached<GigEvent[]>(key);
+  if (cached) return cached;
+
+  const feed = await getEventsFeed();
+  const wanted = normalize(slug);
+  const events = feed.filter((e) => {
+    const coords = e.venueObj?.coordinates;
+    if (!coords || !Array.isArray(coords) || coords.length !== 2) return false;
+    const province = provinceForPoint(coords[0], coords[1]);
+    return province !== null && normalize(province) === wanted;
+  });
+  await setCached(key, events, getTTL());
+  return events;
+}
