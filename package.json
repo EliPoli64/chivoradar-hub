@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@next/env": "^16.2.4",
+    "@upstash/redis": "^1.39.0",
     "dotenv": "^17.4.2",
     "inngest": "^4.2.6",
     "leaflet": "^1.9.4",
