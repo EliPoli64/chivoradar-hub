@@ -5,13 +5,14 @@ import { MOCK_EVENTS } from "@/lib/mockEvents";
 import { groupEventsByVenue, type GigEvent, type VenueGroup } from "@/lib/venues";
 import Hero from "@/components/Hero";
 import MapControls from "@/components/MapControls";
+import Logo from "@/components/Logo";
 import EventSidePanel from "@/components/events/EventSidePanel";
 
 const CLOSE_MS = 200;
 
 const MapSkeleton = () => (
   <div className="w-full h-full bg-cafetal flex flex-col items-center justify-center gap-5">
-    <div className="carreta-mark w-16 h-16 animate-[spin_2.5s_linear_infinite] shadow-[0_0_30px_rgba(230,50,63,0.35)]" />
+    <Logo size={64} animate className="drop-shadow-[0_0_30px_rgba(230,50,63,0.35)]" />
     <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-hueso-dim animate-pulse">
       Sincronizando el radar…
     </p>

@@ -1,3 +1,5 @@
+import Logo from "@/components/Logo";
+
 interface HeroProps {
   totalEvents: number;
   totalVenues: number;
@@ -8,7 +10,7 @@ export default function Hero({ totalEvents, totalVenues, loading }: HeroProps) {
   return (
     <div className="bg-panel/90 backdrop-blur-xl border border-hueso/10 rounded-2xl shadow-2xl p-5 max-w-md">
       <div className="flex items-center gap-2">
-        <span className="carreta-mark w-4 h-4" aria-hidden="true" />
+        <Logo size={18} />
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hueso-dim">
           Radar de la música en vivo
         </p>

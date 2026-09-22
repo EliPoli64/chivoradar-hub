@@ -46,23 +46,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Painted-oxcart radial mark */
-.carreta-mark {
-  background:
-    repeating-conic-gradient(
-      from 0deg,
-      var(--dorado) 0deg 22.5deg,
-      var(--rojo) 22.5deg 45deg,
-      var(--turquesa) 45deg 67.5deg,
-      var(--guaria) 67.5deg 90deg,
-      var(--rosa) 90deg 112.5deg,
-      var(--caribe) 112.5deg 135deg,
-      var(--pacifico) 135deg 157.5deg,
-      var(--dorado) 157.5deg 180deg
-    ),
-    var(--rojo);
-  background-blend-mode: normal;
-  border-radius: 50%;
+/* Marca carreta-radar: el barrido gira como radar (variante animada) */
+@keyframes logoSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.logo-spin .logo-sweep {
+  animation: logoSpin 3s linear infinite;
+  transform-box: view-box;
+  transform-origin: 24px 24px;
 }
 
 /* --- carreta wheel marker --- */
@@ -285,7 +279,8 @@ body {
   .carreta-wheel.selected .wheel-spokes,
   .carreta-wheel.selected .radar-ring,
   .blip-bob,
-  .blip-in {
+  .blip-in,
+  .logo-spin .logo-sweep {
     animation: none !important;
   }
   *,

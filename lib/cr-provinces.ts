@@ -7779,6 +7779,23 @@ export const PROVINCE_BY_SLUG: Record<string, Province> = Object.fromEntries(
   PROVINCES.map((p) => [slugify(p.name), p])
 );
 
+const normKey = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\s-]/g, "");
+
+// Resuelve un parámetro de región (con o sin guiones, con/sin acentos) al slug canónico.
+export function resolveProvinceSlug(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const raw = input.toLowerCase();
+  if (PROVINCE_BY_SLUG[raw]) return raw;
+  const target = normKey(raw);
+  const found = PROVINCES.find((p) => normKey(p.name) === target);
+  return found ? slugify(found.name) : null;
+}
+
 export function provinceForPoint(lng: number, lat: number): string | null {
   const hit = findProvince(lng, lat);
   if (hit) return hit;

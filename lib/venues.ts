@@ -34,6 +34,7 @@ export interface GigEvent {
 
 export interface VenueGroup {
   key: string;
+  slug: string | null;
   name: string;
   address: string | null;
   position: [number, number]; // [lng, lat]
@@ -86,6 +87,7 @@ export function groupEventsByVenue(events: GigEvent[]): VenueGroup[] {
       const prov = PROVINCES.find((p) => p.name === province);
       group = {
         key,
+        slug: e.venueObj?.slug || null,
         name: e.venueObj?.nombre || e.venue || "Lugar por confirmar",
         address: e.venueObj?.direccion || null,
         position: [lng, lat],

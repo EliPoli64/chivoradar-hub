@@ -1,7 +1,8 @@
 import { connectDB } from '@/db/mongodb';
 import Evento from '@/models/evento';
-import { provinceForPoint } from '@/lib/cr-provinces';
+import { provinceForPoint, PROVINCE_BY_SLUG } from '@/lib/cr-provinces';
 import { KEYS, getCached, setCached, getTTL } from '@/lib/redis';
+import { MOCK_EVENTS } from '@/lib/mockEvents';
 import type { GigEvent } from '@/lib/venues';
 
 interface EventoRaw {
@@ -64,7 +65,7 @@ async function loadEventsFromMongo(): Promise<GigEvent[]> {
   const eventos = await Evento.aggregate<EventoRaw>([
     {
       $match: {
-        fechaHora: { $exists: true, $ne: null },
+        fechaHora: { $exists: true, $ne: null, $gte: new Date() },
       },
     },
     {
@@ -128,10 +129,15 @@ async function loadEventsFromMongo(): Promise<GigEvent[]> {
   return eventos.map(formatEvent);
 }
 
+function isUpcoming(e: GigEvent): boolean {
+  return new Date(e.fechaHora).getTime() >= Date.now();
+}
+
 export async function getEventsFeed(): Promise<GigEvent[]> {
   const key = KEYS.events;
   const cached = await getCached<GigEvent[]>(key);
-  if (cached) return cached;
+  // aunque la caché sea reciente, recortar chivos que ya pasaron
+  if (cached) return cached.filter(isUpcoming);
 
   const events = await loadEventsFromMongo();
   await setCached(key, events, getTTL());
@@ -141,7 +147,7 @@ export async function getEventsFeed(): Promise<GigEvent[]> {
 export async function getVenueEvents(slug: string): Promise<GigEvent[]> {
   const key = KEYS.venue(slug);
   const cached = await getCached<GigEvent[]>(key);
-  if (cached) return cached;
+  if (cached) return cached.filter(isUpcoming);
 
   const feed = await getEventsFeed();
   const events = feed.filter(
@@ -161,13 +167,48 @@ export async function getProvinceEvents(slug: string): Promise<GigEvent[]> {
   if (cached) return cached;
 
   const feed = await getEventsFeed();
-  const wanted = normalize(slug);
+  const province = PROVINCE_BY_SLUG[normalize(slug)]?.name;
+  if (!province) {
+    await setCached(key, [], getTTL());
+    return [];
+  }
   const events = feed.filter((e) => {
     const coords = e.venueObj?.coordinates;
     if (!coords || !Array.isArray(coords) || coords.length !== 2) return false;
-    const province = provinceForPoint(coords[0], coords[1]);
-    return province !== null && normalize(province) === wanted;
+    return provinceForPoint(coords[0], coords[1]) === province;
   });
-  await setCached(key, events, getTTL());
-  return events;
+  await setCached(key, events.filter(isUpcoming), getTTL());
+  return events.filter(isUpcoming);
+}
+
+export async function getEventsSafe(): Promise<GigEvent[]> {
+  try {
+    return await getEventsFeed();
+  } catch {
+    return MOCK_EVENTS.filter(isUpcoming);
+  }
+}
+
+export async function getProvinceEventsSafe(slug: string): Promise<GigEvent[]> {
+  try {
+    return await getProvinceEvents(slug);
+  } catch {
+    const province = PROVINCE_BY_SLUG[normalize(slug)]?.name;
+    return MOCK_EVENTS.filter((e) => {
+      if (!isUpcoming(e)) return false;
+      const coords = e.venueObj?.coordinates;
+      if (!coords) return false;
+      return province ? provinceForPoint(coords[0], coords[1]) === province : false;
+    });
+  }
+}
+
+export async function getVenueEventsSafe(slug: string): Promise<GigEvent[]> {
+  try {
+    return await getVenueEvents(slug);
+  } catch {
+    return MOCK_EVENTS.filter(
+      (e) => isUpcoming(e) && (e.venueObj?.slug === slug || e.venue === slug),
+    );
+  }
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { PROVINCES } from "@/lib/cr-provinces";
+import Logo from "@/components/Logo";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,7 +12,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <span className="carreta-mark w-8 h-8" aria-hidden="true" />
+              <Logo size={32} />
               <span className="font-display text-xl tracking-tight text-hueso">
                 CHIVO<span className="text-rojo">RADAR</span>
               </span>
@@ -61,8 +62,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/lugares" className="hover:text-hueso transition-colors">
-                  Lugares Patrocinados
+                <Link href="/venues" className="hover:text-hueso transition-colors">
+                  Lugares
                 </Link>
               </li>
               <li>
