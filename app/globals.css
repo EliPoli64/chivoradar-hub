@@ -163,6 +163,26 @@ body {
   }
 }
 
+/* blip-in: aparición de marcadores y clusters al expandir el mapa */
+@keyframes blipIn {
+  0% {
+    transform: scale(0.3) translateY(8px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.blip-in {
+  animation: blipIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.12s backwards;
+}
+
 .anim-rise {
   animation: riseIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -264,7 +284,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .carreta-wheel.selected .wheel-spokes,
   .carreta-wheel.selected .radar-ring,
-  .blip-bob {
+  .blip-bob,
+  .blip-in {
     animation: none !important;
   }
   *,
