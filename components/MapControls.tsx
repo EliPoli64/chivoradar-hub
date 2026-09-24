@@ -2,13 +2,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, LocateFixed, ChevronLeft, ChevronRight } from "lucide-react";
 import { PROVINCES } from "@/lib/cr-provinces";
-import { GENEROS } from "@/lib/venues";
 
 interface Props {
   search: string;
   onSearch: (s: string) => void;
   genre: string;
   onGenre: (g: string) => void;
+  categories: string[];
   province: string | null;
   onProvince: (p: string | null) => void;
   onReset: () => void;
@@ -21,6 +21,7 @@ export default function MapControls({
   onSearch,
   genre,
   onGenre,
+  categories,
   province,
   onProvince,
   onReset,
@@ -96,7 +97,7 @@ export default function MapControls({
           onScroll={updateEdges}
           className="flex gap-1.5 overflow-x-auto no-scrollbar md:flex-wrap md:overflow-visible pb-1"
         >
-          {GENEROS.map((g) => (
+          {["Todos", ...categories].map((g) => (
             <button
               key={g}
               onClick={() => onGenre(g)}

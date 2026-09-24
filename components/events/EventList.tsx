@@ -1,7 +1,7 @@
 "use client";
 import { ExternalLink, Ticket } from "lucide-react";
 import type { GigEvent } from "@/lib/venues";
-import { formatHora, formatPrecio } from "@/lib/venues";
+import { formatHora, formatPrecio, isSinCategoria } from "@/lib/venues";
 
 interface Props {
   events: GigEvent[];
@@ -52,12 +52,14 @@ export default function EventList({ events, color }: Props) {
                   {e.titulo}
                 </p>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span
-                    className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded"
-                    style={{ color, background: `${color}1f` }}
-                  >
-                    {e.categoria}
-                  </span>
+                  {!isSinCategoria(e.categoria) && (
+                    <span
+                      className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded"
+                      style={{ color, background: `${color}1f` }}
+                    >
+                      {e.categoria}
+                    </span>
+                  )}
                   <span className="font-mono text-[10px] text-hueso-dim">
                     {formatHora(e.fechaHora)}
                   </span>

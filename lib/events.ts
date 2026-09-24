@@ -3,7 +3,7 @@ import Evento from '@/models/evento';
 import { provinceForPoint, PROVINCE_BY_SLUG } from '@/lib/cr-provinces';
 import { KEYS, getCached, setCached, getTTL } from '@/lib/redis';
 import { MOCK_EVENTS } from '@/lib/mockEvents';
-import type { GigEvent } from '@/lib/venues';
+import { distinctCategorias, isSinCategoria, type GigEvent } from '@/lib/venues';
 
 interface EventoRaw {
   _id: string;
@@ -210,5 +210,24 @@ export async function getVenueEventsSafe(slug: string): Promise<GigEvent[]> {
     return MOCK_EVENTS.filter(
       (e) => isUpcoming(e) && (e.venueObj?.slug === slug || e.venue === slug),
     );
+  }
+}
+
+export async function getCategories(): Promise<string[]> {
+  const key = KEYS.categories;
+  const cached = await getCached<string[]>(key);
+  if (cached) return cached.filter((c) => !isSinCategoria(c));
+
+  const feed = await getEventsFeed();
+  const categories = distinctCategorias(feed);
+  await setCached(key, categories, getTTL());
+  return categories;
+}
+
+export async function getCategoriesSafe(): Promise<string[]> {
+  try {
+    return await getCategories();
+  } catch {
+    return distinctCategorias(MOCK_EVENTS);
   }
 }

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { Calendar, MapPin, Ticket } from "lucide-react";
 import { PROVINCES, provinceForPoint } from "@/lib/cr-provinces";
+import { isSinCategoria } from "@/lib/venues";
 
 interface EventProps {
   title: string;
@@ -46,12 +47,14 @@ export default function EventCard({
             <span className="text-hueso-dim text-sm">Sin imagen</span>
           </div>
         )}
-        <span
-          className="absolute top-4 left-4 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider text-cafetal"
-          style={{ background: color }}
-        >
-          {genre}
-        </span>
+        {!isSinCategoria(genre) && (
+          <span
+            className="absolute top-4 left-4 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider text-cafetal"
+            style={{ background: color }}
+          >
+            {genre}
+          </span>
+        )}
       </div>
 
       <div className="p-5 space-y-3">

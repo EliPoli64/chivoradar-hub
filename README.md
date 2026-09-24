@@ -105,7 +105,7 @@ app/
 ├── globals.css          # Design tokens, carreta palette, animations
 └── page.tsx             # Home: full-bleed live map + "Cerca Tuyo" grid
 components/
-├── events/              # EventCard, EventGrid, EventList, EventSidePanel, FilterBar
+├── events/              # EventCard, EventGrid, EventList, EventSidePanel
 ├── explore/             # ExploreView (province/genre/search client filters)
 ├── venues/              # VenueCard, VenueMiniMap
 ├── Hero.tsx             # Map overlay: headline + live telemetry

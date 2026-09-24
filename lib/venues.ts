@@ -1,15 +1,19 @@
 import { provinceForPoint, PROVINCES } from "./cr-provinces";
 
-export const GENEROS = [
-  "Todos",
-  "Rock",
-  "Electrónica",
-  "Metal",
-  "Jazz",
-  "Reggae",
-  "Indie",
-  "Salsa",
-];
+export function isSinCategoria(c: string): boolean {
+  const t = (c ?? "").trim().toLowerCase();
+  return t === "" || t === "sin categoría" || t === "sin categoria";
+}
+
+export function distinctCategorias(events: { categoria: string }[]): string[] {
+  const set = new Set<string>();
+  for (const e of events) {
+    const c = e.categoria?.trim();
+    if (!c || isSinCategoria(c)) continue;
+    set.add(c);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
+}
 
 export interface GigEvent {
   id: string;

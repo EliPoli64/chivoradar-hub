@@ -24,8 +24,13 @@ const Map = dynamic(() => import("@/components/Map"), {
   loading: () => null,
 });
 
-export default function LiveMap() {
+interface LiveMapProps {
+  initialCategories?: string[];
+}
+
+export default function LiveMap({ initialCategories }: LiveMapProps) {
   const [events, setEvents] = useState<GigEvent[]>([]);
+  const [categories] = useState<string[]>(initialCategories ?? []);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [genre, setGenre] = useState("Todos");
@@ -153,6 +158,7 @@ export default function LiveMap() {
               onSearch={setSearch}
               genre={genre}
               onGenre={setGenre}
+              categories={categories}
               province={province}
               onProvince={setProvince}
               onReset={handleReset}
@@ -170,6 +176,7 @@ export default function LiveMap() {
           onSearch={setSearch}
           genre={genre}
           onGenre={setGenre}
+          categories={categories}
           province={province}
           onProvince={setProvince}
           onReset={handleReset}

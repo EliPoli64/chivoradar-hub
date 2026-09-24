@@ -3,15 +3,16 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { PROVINCES, PROVINCE_BY_SLUG } from "@/lib/cr-provinces";
-import { GENEROS, type GigEvent } from "@/lib/venues";
+import { type GigEvent } from "@/lib/venues";
 import EventCard from "@/components/events/EventCard";
 
 interface Props {
   events: GigEvent[];
+  categories: string[];
   region: string | null;
 }
 
-export default function ExploreView({ events, region }: Props) {
+export default function ExploreView({ events, categories, region }: Props) {
   const [genre, setGenre] = useState("Todos");
   const [query, setQuery] = useState("");
 
@@ -84,7 +85,7 @@ export default function ExploreView({ events, region }: Props) {
         </div>
 
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar md:flex-wrap md:overflow-visible">
-          {GENEROS.map((g) => (
+          {["Todos", ...categories].map((g) => (
             <button
               key={g}
               onClick={() => setGenre(g)}

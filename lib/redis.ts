@@ -2,6 +2,7 @@ import { Redis } from '@upstash/redis';
 
 export const KEYS = {
   events: 'chivoradar:events:v2',
+  categories: 'chivoradar:categories:v1',
   venue: (slug: string) => `chivoradar:venue:${slug}:v2`,
   province: (slug: string) => `chivoradar:province:${slug}:v2`,
 } as const;

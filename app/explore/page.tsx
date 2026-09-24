@@ -1,4 +1,4 @@
-import { getEventsSafe, getProvinceEventsSafe } from "@/lib/events";
+import { getCategoriesSafe, getEventsSafe, getProvinceEventsSafe } from "@/lib/events";
 import { PROVINCE_BY_SLUG, resolveProvinceSlug } from "@/lib/cr-provinces";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,7 +13,10 @@ interface Props {
 export default async function ExplorePage({ searchParams }: Props) {
   const { region } = await searchParams;
   const slug = resolveProvinceSlug(region);
-  const events = slug ? await getProvinceEventsSafe(slug) : await getEventsSafe();
+  const [events, categories] = await Promise.all([
+    slug ? getProvinceEventsSafe(slug) : getEventsSafe(),
+    getCategoriesSafe(),
+  ]);
   const provinceName = slug ? PROVINCE_BY_SLUG[slug]?.name : null;
 
   return (
@@ -33,7 +36,7 @@ export default async function ExplorePage({ searchParams }: Props) {
             : "Del garaje al estadio, de San José a Limón."}
         </p>
 
-        <ExploreView events={events} region={slug} />
+        <ExploreView events={events} categories={categories} region={slug} />
       </section>
 
       <Footer />

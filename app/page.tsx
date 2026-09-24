@@ -1,16 +1,18 @@
+import { getCategoriesSafe } from "@/lib/events";
 import Navbar from "@/components/Navbar";
 import LiveMap from "@/components/LiveMap";
 import EventGrid from "@/components/events/EventGrid";
 import Footer from "@/components/Footer";
 
-export default function Home() {
+export default async function Home() {
+  const categories = await getCategoriesSafe();
   return (
     <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
 
       {/* mapa como protagonista */}
       <section id="mapa" className="h-[calc(100dvh-64px)] md:h-[86vh] min-h-[520px]">
-        <LiveMap />
+        <LiveMap initialCategories={categories} />
       </section>
 
       {/* chivos recomendados */}
