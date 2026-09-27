@@ -8,12 +8,13 @@ Find your next gig ("chivo") across the country.
 - **Map-first homepage** — A full-bleed live map (Leaflet + CARTO Voyager tiles) as the centerpiece. Venues are **painted carreta-wheel markers** in their province color, with a live event-count badge.
 - **7 provinces, 7 colors** — Markers, filters, and navigation are colored by province (San José rojo, Alajuela dorado, Cartago guaria, Heredia rosa, Guanacaste turquesa, Puntarenas azul, Limón caribe). Province chips fly the map to each region.
 - **Multiple events at one place** — Markers group **by venue**; clicking one opens a side panel listing every gig at that venue (date, price tiers, ticket links) instead of popups.
-- **Search + genre filters** — Filter markers live by artist, venue, or genre; non-matching blips dim.
+- **Search + category filters** — Filter markers live by artist, venue, or category. The category chips are **data-driven from the database** (Conciertos, Teatro, Deportes, …), never hardcoded, and "Sin Categoría" is excluded from the filters and hidden from event badges.
 - **Smooth expansions** — Markers and clusters blip-in in sync with the map zoom (respects `prefers-reduced-motion`).
-- **/explore** — Browse events by province (`?region=`), genre, or search, list-first.
+- **/explore** — Browse events by province (`?region=`), category, or search, list-first.
 - **/venues + /venues/[slug]** — Catalog of every place with upcoming gigs; each venue has a detail page with all its events and a mini map.
-- **Upcoming only** — Past concerts are filtered out at the data layer.
-- **Redis-cached** — The feed and venue/province lookups are cached in Upstash Redis.
+- **/eventos/[id]** — Event detail page: description, price tiers, ticket CTA, a mini map with the real gig count for that place, and other upcoming gigs at the same venue.
+- **Upcoming only** — Past concerts are filtered out at the data layer (Mongo aggregation + cache read-through).
+- **Redis-cached** — The event feed, the derived categories list, and venue/province lookups are cached in Upstash Redis.
 
 ## Design System
 
@@ -97,7 +98,9 @@ npm run lint
 ```
 app/
 ├── api/fetch/           # API route: upcoming events (venues + price tiers), Redis-cached
-├── explore/page.tsx     # /explore — events by province/genre/search
+├── api/categories/      # API route: distinct event categories (data-driven), Redis-cached
+├── explore/page.tsx     # /explore — events by province/category/search
+├── eventos/[id]/        # /eventos/[id] — event detail page
 ├── venues/page.tsx      # /venues — venue catalog
 ├── venues/[slug]/       # /venues/[slug] — venue detail with mini map
 ├── layout.tsx           # Root layout (fonts, metadata, lang="es")
@@ -106,22 +109,22 @@ app/
 └── page.tsx             # Home: full-bleed live map + "Cerca Tuyo" grid
 components/
 ├── events/              # EventCard, EventGrid, EventList, EventSidePanel
-├── explore/             # ExploreView (province/genre/search client filters)
+├── explore/             # ExploreView (province/category/search client filters)
 ├── venues/              # VenueCard, VenueMiniMap
 ├── Hero.tsx             # Map overlay: headline + live telemetry
 ├── LiveMap.tsx          # Map hero container (state + overlays)
 ├── Map.tsx              # Leaflet map: carreta markers, clusters, province nav
-├── MapControls.tsx      # Search, province chips, genres, reset, telemetry
+├── MapControls.tsx      # Search, province chips, categories, reset, telemetry
 ├── Logo.tsx             # Carreta-radar SVG mark
 ├── Navbar.tsx
 └── Footer.tsx
 lib/
 ├── cr-provinces.ts      # Province polygons, centroids, colors, slug resolution
-├── events.ts            # Mongo aggregation + Redis cache + mock fallbacks
-├── markers.ts           # Shared carreta-wheel marker HTML
+├── events.ts            # Mongo aggregation + Redis cache + categories + mock fallbacks
+├── markers.ts           # Shared carreta-wheel marker HTML (with gig count)
 ├── mockEvents.ts        # Dev fallback dataset
 ├── redis.ts             # Upstash client + cache helpers + key versions
-└── venues.ts            # Venue grouping, formatting, CR bounds
+└── venues.ts            # Venue grouping, formatting, CR bounds, category helpers
 db/
 └── mongodb.ts           # MongoDB connection with Mongoose
 models/                  # Mongoose models: Evento, Venue, TierPrecio
@@ -140,6 +143,10 @@ models/                  # Mongoose models: Evento, Venue, TierPrecio
 Returns **upcoming** events (past concerts are filtered at the aggregation) with their venues and price tiers, sorted by date, and cached in Redis for `CACHE_TTL_SECONDS` (response header `Cache-Control: public, s-maxage=300, stale-while-revalidate=300`).
 
 Each event includes: `id`, `titulo`, `artista`, `categoria`, `fechaHora`, `descripcion`, `link`, `urlImagen`, `venueId`, `venueObj` (with `coordinates` `[lng, lat]`), `venue`, and `tiersPrecio`.
+
+### `GET /api/categories`
+
+Returns the distinct `categoria` values present in the **upcoming** feed, sorted Spanish-locale and cached in Redis for `CACHE_TTL_SECONDS`. "Sin Categoría" is always excluded. The homepage map and `/explore` use this list to build their filter chips.
 
 ## Roadmap / In Progress
 
