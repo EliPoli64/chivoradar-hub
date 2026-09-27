@@ -1,10 +1,12 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { Calendar, MapPin, Ticket } from "lucide-react";
 import { PROVINCES, provinceForPoint } from "@/lib/cr-provinces";
 import { isSinCategoria } from "@/lib/venues";
 
 interface EventProps {
+  id: string;
   title: string;
   artist: string;
   venue: string;
@@ -16,6 +18,7 @@ interface EventProps {
 }
 
 export default function EventCard({
+  id,
   title,
   artist,
   venue,
@@ -58,9 +61,11 @@ export default function EventCard({
       </div>
 
       <div className="p-5 space-y-3">
-        <h3 className="text-xl font-bold leading-tight text-hueso group-hover:text-rojo transition-colors">
-          {title}
-        </h3>
+        <Link href={`/eventos/${id}`} className="group-hover:text-rojo transition-colors">
+          <h3 className="text-xl font-bold leading-tight text-hueso group-hover:text-rojo transition-colors">
+            {title}
+          </h3>
+        </Link>
 
         <div className="space-y-1.5 text-sm text-hueso-dim">
           <div className="flex items-center gap-2">

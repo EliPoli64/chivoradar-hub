@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { ExternalLink, Ticket } from "lucide-react";
 import type { GigEvent } from "@/lib/venues";
 import { formatHora, formatPrecio, isSinCategoria } from "@/lib/venues";
@@ -45,12 +46,17 @@ export default function EventList({ events, color }: Props) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold leading-snug text-hueso">
-                  {e.artista}
-                </p>
-                <p className="text-xs text-hueso-dim leading-snug mt-0.5 line-clamp-2">
-                  {e.titulo}
-                </p>
+                <Link
+                  href={`/eventos/${e.id}`}
+                  className="block group-hover:text-rojo transition-colors"
+                >
+                  <p className="text-sm font-bold leading-snug text-hueso">
+                    {e.artista}
+                  </p>
+                  <p className="text-xs text-hueso-dim leading-snug mt-0.5 line-clamp-2">
+                    {e.titulo}
+                  </p>
+                </Link>
                 <div className="flex items-center gap-2 mt-1.5">
                   {!isSinCategoria(e.categoria) && (
                     <span

@@ -231,3 +231,16 @@ export async function getCategoriesSafe(): Promise<string[]> {
     return distinctCategorias(MOCK_EVENTS);
   }
 }
+
+export async function getEventById(id: string): Promise<GigEvent | null> {
+  const feed = await getEventsFeed();
+  return feed.find((e) => e.id === id) ?? null;
+}
+
+export async function getEventByIdSafe(id: string): Promise<GigEvent | null> {
+  try {
+    return await getEventById(id);
+  } catch {
+    return MOCK_EVENTS.filter(isUpcoming).find((e) => e.id === id) ?? null;
+  }
+}

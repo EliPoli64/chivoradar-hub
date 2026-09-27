@@ -41,6 +41,7 @@ export default function EventGrid() {
           style={{ animationDelay: `${Math.min(i * 70, 420)}ms` }}
         >
           <EventCard
+            id={gig.id}
             title={gig.titulo}
             artist={gig.artista}
             venue={gig.venue}
