@@ -59,6 +59,25 @@ body {
   transform-origin: 24px 24px;
 }
 
+/* el "chivo detectado" late en el frente del barrido */
+@keyframes logoBlip {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.82);
+  }
+}
+
+.logo-spin .logo-blip {
+  animation: logoBlip 1.5s ease-in-out infinite;
+  transform-box: view-box;
+  transform-origin: 41.22px 15.97px;
+}
+
 /* --- carreta wheel marker --- */
 .carreta-wheel {
   position: relative;
@@ -286,7 +305,8 @@ body {
   .carreta-wheel.selected .radar-ring,
   .blip-bob,
   .blip-in,
-  .logo-spin .logo-sweep {
+  .logo-spin .logo-sweep,
+  .logo-spin .logo-blip {
     animation: none !important;
   }
   *,

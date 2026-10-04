@@ -20,7 +20,7 @@ Find your next gig ("chivo") across the country.
 
 - Dark "night" page (`cafetal`) with a bright carreta-painted map as the source of color.
 - Typography: **Alfa Slab One** (display), **Karla** (body), **IBM Plex Mono** (radar telemetry: counts, coordinates, prices).
-- Logo: the **carreta-radar** — a slice of the painted oxcart wheel sweeping like radar, tipped with a music note.
+- Logo: the **carreta-radar** — the painted oxcart wheel used for the map markers, with the radar reduced to a single sector sweeping around it and a music note in the hub.
 
 ## Tech Stack
 
