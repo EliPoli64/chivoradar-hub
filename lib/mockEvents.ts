@@ -506,6 +506,3 @@ export const MOCK_EVENTS: MockEvent[] = [
   },
 ];
 
-export const MOCK_CATEGORIES = Array.from(
-  new Set(MOCK_EVENTS.map((e) => e.categoria))
-);

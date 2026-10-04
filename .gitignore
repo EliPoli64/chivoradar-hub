@@ -41,6 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 # misc MDs
-DATA_MODEL.md
-UI_MASTER_PLAN.md
-REDIS_CACHE_PLAN.md
+*.plan.md
+

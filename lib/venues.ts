@@ -1,15 +1,19 @@
 import { provinceForPoint, PROVINCES } from "./cr-provinces";
 
-export const GENEROS = [
-  "Todos",
-  "Rock",
-  "Electrónica",
-  "Metal",
-  "Jazz",
-  "Reggae",
-  "Indie",
-  "Salsa",
-];
+export function isSinCategoria(c: string): boolean {
+  const t = (c ?? "").trim().toLowerCase();
+  return t === "" || t === "sin categoría" || t === "sin categoria";
+}
+
+export function distinctCategorias(events: { categoria: string }[]): string[] {
+  const set = new Set<string>();
+  for (const e of events) {
+    const c = e.categoria?.trim();
+    if (!c || isSinCategoria(c)) continue;
+    set.add(c);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
+}
 
 export interface GigEvent {
   id: string;
@@ -34,6 +38,7 @@ export interface GigEvent {
 
 export interface VenueGroup {
   key: string;
+  slug: string | null;
   name: string;
   address: string | null;
   position: [number, number]; // [lng, lat]
@@ -86,6 +91,7 @@ export function groupEventsByVenue(events: GigEvent[]): VenueGroup[] {
       const prov = PROVINCES.find((p) => p.name === province);
       group = {
         key,
+        slug: e.venueObj?.slug || null,
         name: e.venueObj?.nombre || e.venue || "Lugar por confirmar",
         address: e.venueObj?.direccion || null,
         position: [lng, lat],
