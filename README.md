@@ -6,12 +6,13 @@ Find your next gig ("chivo") across the country.
 ## Features
 
 - **Map-first homepage** — A full-bleed live map (Leaflet + CARTO Voyager tiles) as the centerpiece. Venues are **painted carreta-wheel markers** in their province color, with a live event-count badge.
-- **7 provinces, 7 colors** — Markers, filters, and navigation are colored by province (San José rojo, Alajuela dorado, Cartago guaria, Heredia rosa, Guanacaste turquesa, Puntarenas azul, Limón caribe). Province chips fly the map to each region.
+- **7 provinces, 7 colors** — Markers, filters, and navigation are colored by province (San José rojo, Alajuela dorado, Cartago guaria, Heredia rosa, Guanacaste turquesa, Puntarenas azul, Limón caribe). Selecting a province flies the map to that region.
 - **Multiple events at one place** — Markers group **by venue**; clicking one opens a side panel listing every gig at that venue (date, price tiers, ticket links) instead of popups.
 - **Search + category filters** — Filter markers live by artist, venue, or category. The category chips are **data-driven from the database** (Conciertos, Teatro, Deportes, …), never hardcoded, and "Sin Categoría" is excluded from the filters and hidden from event badges.
 - **Smooth expansions** — Markers and clusters blip-in in sync with the map zoom (respects `prefers-reduced-motion`).
-- **/explore** — Browse events by province (`?region=`), category, or search, list-first.
-- **/venues + /venues/[slug]** — Catalog of every place with upcoming gigs; each venue has a detail page with all its events and a mini map.
+- **Province signal map** (`ProvinceSignal`) — the shared region control. On `/explore` and `/venues` it is a true-scale silhouette of Costa Rica whose provinces are filled in their own color at an intensity proportional to their share of the gigs; provinces with none stay as bare outlines, so silence is visible. Over the homepage map — where there is no room for a map — the same encoding collapses into a ranked bar list. Counts always exclude the province filter itself, so you can still see where the rest of the signal is.
+- **/explore** — Browse events by province (`?region=`), category, or search. Category chips are counts of what each one would yield.
+- **/venues + /venues/[slug]** — Catalog of every place with upcoming gigs, as a ruled ledger of rows (most active first) where the next gig appears as a poster-style day block; each venue has a detail page with all its events and a mini map.
 - **/eventos/[id]** — Event detail page: description, price tiers, ticket CTA, a mini map with the real gig count for that place, and other upcoming gigs at the same venue.
 - **Upcoming only** — Past concerts are filtered out at the data layer (Mongo aggregation + cache read-through).
 - **Redis-cached** — The event feed, the derived categories list, and venue/province lookups are cached in Upstash Redis.
@@ -110,11 +111,12 @@ app/
 components/
 ├── events/              # EventCard, EventGrid, EventList, EventSidePanel
 ├── explore/             # ExploreView (province/category/search client filters)
-├── venues/              # VenueCard, VenueMiniMap
+├── venues/              # VenueCard (ledger row), VenueMiniMap
 ├── Hero.tsx             # Map overlay: headline + live telemetry
 ├── LiveMap.tsx          # Map hero container (state + overlays)
 ├── Map.tsx              # Leaflet map: carreta markers, clusters, province nav
-├── MapControls.tsx      # Search, province chips, categories, reset, telemetry
+├── MapControls.tsx      # Search, province bars, categories, reset, telemetry
+├── ProvinceSignal.tsx   # Shared region control: CR silhouette / bar list
 ├── Logo.tsx             # Carreta-radar SVG mark
 ├── Navbar.tsx
 └── Footer.tsx
@@ -146,7 +148,7 @@ Each event includes: `id`, `titulo`, `artista`, `categoria`, `fechaHora`, `descr
 
 ### `GET /api/categories`
 
-Returns the distinct `categoria` values present in the **upcoming** feed, sorted Spanish-locale and cached in Redis for `CACHE_TTL_SECONDS`. "Sin Categoría" is always excluded. The homepage map and `/explore` use this list to build their filter chips.
+Returns the distinct `categoria` values present in the **upcoming** feed, sorted Spanish-locale and cached in Redis for `CACHE_TTL_SECONDS`. "Sin Categoría" is always excluded. The homepage map and `/explore` use this list to build their category filters.
 
 ## Roadmap / In Progress
 
