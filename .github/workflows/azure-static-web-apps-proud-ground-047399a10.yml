@@ -19,13 +19,21 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Write build-time public env
+        env:
+          CARTO_KEY: ${{ vars.NEXT_PUBLIC_CARTO_API_KEY || secrets.NEXT_PUBLIC_CARTO_API_KEY }}
+        run: |
+          if [ -z "$CARTO_KEY" ]; then
+            echo "::error::NEXT_PUBLIC_CARTO_API_KEY is not set as an Actions variable or secret."
+            exit 1
+          fi
+          echo "NEXT_PUBLIC_CARTO_API_KEY=$CARTO_KEY" > .env.production
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         env: 
           CONN_STRING: ${{ secrets.CONN_STRING }}
           DB_NAME: ${{ secrets.DB_NAME }}
-          NEXT_PUBLIC_CARTO_API_KEY: ${{ secrets.NEXT_PUBLIC_CARTO_API_KEY }}
           UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
           CACHE_TTL_SECONDS: ${{ secrets.CACHE_TTL_SECONDS }}
