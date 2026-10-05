@@ -60,17 +60,19 @@ export default function EventCard({
         )}
       </div>
 
-      <div className="p-5 space-y-3">
+      {/* flex column + mt-auto en el botón: los botones de una misma fila
+          quedan alineados aunque los títulos ocupen distinto número de líneas */}
+      <div className="flex flex-col p-5">
         <Link href={`/eventos/${id}`} className="group-hover:text-rojo transition-colors">
           <h3 className="text-xl font-bold leading-tight text-hueso group-hover:text-rojo transition-colors">
             {title}
           </h3>
         </Link>
 
-        <div className="space-y-1.5 text-sm text-hueso-dim">
+        <div className="mt-3 space-y-1.5 text-sm text-hueso-dim">
           <div className="flex items-center gap-2">
             <MapPin size={14} className="shrink-0" style={{ color }} />
-            <span>{venue}</span>
+            <span className="truncate">{venue}</span>
           </div>
           <div className="flex items-center gap-2 font-mono text-xs">
             <Calendar size={14} className="shrink-0" style={{ color }} />
@@ -82,7 +84,7 @@ export default function EventCard({
           href={link || "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 w-full py-2.5 mt-2 bg-cafetal group-hover:bg-rojo group-hover:text-white rounded-lg text-sm font-bold text-hueso transition-colors border border-hueso/10 group-hover:border-rojo"
+          className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-lg border border-hueso/10 bg-cafetal py-2.5 text-sm font-bold text-hueso transition-colors group-hover:border-rojo group-hover:bg-rojo group-hover:text-white"
         >
           <Ticket size={14} />
           Conseguir Entradas

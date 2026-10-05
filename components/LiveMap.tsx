@@ -2,7 +2,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { MOCK_EVENTS } from "@/lib/mockEvents";
-import { groupEventsByVenue, type GigEvent, type VenueGroup } from "@/lib/venues";
+import {
+  groupEventsByVenue,
+  chivosPorProvincia,
+  type GigEvent,
+  type VenueGroup,
+} from "@/lib/venues";
 import Hero from "@/components/Hero";
 import MapControls from "@/components/MapControls";
 import Logo from "@/components/Logo";
@@ -12,7 +17,11 @@ const CLOSE_MS = 200;
 
 const MapSkeleton = () => (
   <div className="w-full h-full bg-cafetal flex flex-col items-center justify-center gap-5">
-    <Logo size={64} animate className="drop-shadow-[0_0_30px_rgba(230,50,63,0.35)]" />
+    <Logo
+      size={64}
+      animate
+      className="drop-shadow-[0_0_30px_rgba(230,50,63,0.35)]"
+    />
     <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-hueso-dim animate-pulse">
       Sincronizando el radar…
     </p>
@@ -77,25 +86,36 @@ export default function LiveMap({ initialCategories }: LiveMapProps) {
 
   const groups = useMemo(() => groupEventsByVenue(events), [events]);
 
+  // el conteo viene de la misma función que usa el mapa para filtrar, así que
+  // las barras nunca contradicen los marcadores. Ignora el filtro de provincia
+  // para que siempre se vea dónde más hay señal.
+  const provinceCounts = useMemo(
+    () => chivosPorProvincia(groups, search, genre),
+    [groups, search, genre],
+  );
+
   // cerrar el panel con una salida animada antes de desmontarlo
-  const handleSelect = useCallback((venue: VenueGroup | null) => {
-    if (venue) {
-      if (closeTimer.current) {
-        clearTimeout(closeTimer.current);
-        closeTimer.current = null;
+  const handleSelect = useCallback(
+    (venue: VenueGroup | null) => {
+      if (venue) {
+        if (closeTimer.current) {
+          clearTimeout(closeTimer.current);
+          closeTimer.current = null;
+        }
+        setClosing(false);
+        setSelected(venue);
+        return;
       }
-      setClosing(false);
-      setSelected(venue);
-      return;
-    }
-    if (!selectedRef.current || closing) return;
-    setClosing(true);
-    closeTimer.current = setTimeout(() => {
-      setSelected(null);
-      setClosing(false);
-      closeTimer.current = null;
-    }, CLOSE_MS);
-  }, [closing]);
+      if (!selectedRef.current || closing) return;
+      setClosing(true);
+      closeTimer.current = setTimeout(() => {
+        setSelected(null);
+        setClosing(false);
+        closeTimer.current = null;
+      }, CLOSE_MS);
+    },
+    [closing],
+  );
 
   const handleReset = useCallback(() => {
     handleSelect(null);
@@ -127,32 +147,58 @@ export default function LiveMap({ initialCategories }: LiveMapProps) {
         </div>
       )}
 
-      {/* hero */}
-      <div className={`absolute top-20 left-5 md:left-5 md:max-w-[380px] z-20 ${enterClass}`}>
-        <Hero totalEvents={events.length} totalVenues={groups.length} loading={loading} />
+      {/* riel izquierdo (desktop): hero arriba, controles abajo, en un solo
+          contenedor flexible. Antes cada tarjeta se posicionaba sola contra
+          un borde y, al crecer el panel de controles, tapaba al hero. Aquí el
+          alto se reparte entre las dos y los controles internos se desplazan. */}
+      <div
+        className={`absolute top-20 bottom-4 left-5 z-20 hidden w-[380px] max-w-[calc(100vw-2rem)] flex-col gap-3 md:flex ${enterClass}`}
+      >
+        <div className="shrink-0">
+          <Hero
+            totalEvents={events.length}
+            totalVenues={groups.length}
+            loading={loading}
+          />
+        </div>
+        <div className="mt-auto flex min-h-0 flex-1 flex-col justify-end">
+          <MapControls
+            search={search}
+            onSearch={setSearch}
+            genre={genre}
+            onGenre={setGenre}
+            categories={categories}
+            province={province}
+            onProvince={setProvince}
+            onReset={handleReset}
+            totalEvents={events.length}
+            totalVenues={groups.length}
+            provinceCounts={provinceCounts}
+          />
+        </div>
       </div>
 
-      {/* panel de eventos (desktop) */}
-      <div className="hidden md:block absolute top-28 right-4 z-30 w-[380px] max-w-[calc(100vw-2rem)]">
-        {selected && (
-          <EventSidePanel
-            venue={selected}
-            closing={closing}
-            onClose={() => handleSelect(null)}
+      {/* riel inferior (mobile): hero arriba y, debajo, la hoja de controles o
+          el lugar elegido. Mismo patrón que en desktop, para que en pantallas
+          bajas la hoja no suba hasta tapar el hero. */}
+      <div
+        className={`absolute inset-x-4 top-20 bottom-4 z-30 flex flex-col gap-3 md:hidden ${enterClass}`}
+      >
+        <div className="shrink-0">
+          <Hero
+            totalEvents={events.length}
+            totalVenues={groups.length}
+            loading={loading}
           />
-        )}
-      </div>
-
-      {/* hoja inferior (mobile): controles o lugar elegido */}
-      <div className="md:hidden absolute inset-x-4 bottom-4 z-30">
-        {selected ? (
-          <EventSidePanel
-            venue={selected}
-            closing={closing}
-            onClose={() => handleSelect(null)}
-          />
-        ) : (
-          <div className={enterClass}>
+        </div>
+        <div className="mt-auto flex min-h-0 flex-1 flex-col justify-end">
+          {selected ? (
+            <EventSidePanel
+              venue={selected}
+              closing={closing}
+              onClose={() => handleSelect(null)}
+            />
+          ) : (
             <MapControls
               search={search}
               onSearch={setSearch}
@@ -164,25 +210,22 @@ export default function LiveMap({ initialCategories }: LiveMapProps) {
               onReset={handleReset}
               totalEvents={events.length}
               totalVenues={groups.length}
+              provinceCounts={provinceCounts}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* controles (desktop) */}
-      <div className={`hidden md:block absolute bottom-4 left-5 z-20 w-[380px] max-w-[calc(100vw-2rem)] ${enterClass}`}>
-        <MapControls
-          search={search}
-          onSearch={setSearch}
-          genre={genre}
-          onGenre={setGenre}
-          categories={categories}
-          province={province}
-          onProvince={setProvince}
-          onReset={handleReset}
-          totalEvents={events.length}
-          totalVenues={groups.length}
-        />
+      {/* panel de eventos (desktop): va al lado contrario del riel, para no
+          tapar el centro del mapa */}
+      <div className="hidden md:block absolute top-28 right-4 z-30 w-[380px] max-w-[calc(100vw-2rem)]">
+        {selected && (
+          <EventSidePanel
+            venue={selected}
+            closing={closing}
+            onClose={() => handleSelect(null)}
+          />
+        )}
       </div>
     </div>
   );

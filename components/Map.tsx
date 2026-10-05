@@ -6,7 +6,7 @@ import type {
   Map as LeafletMap,
 } from "leaflet";
 import { useMap, useMapEvents } from "react-leaflet";
-import type { VenueGroup } from "@/lib/venues";
+import { venueMatches, type VenueGroup } from "@/lib/venues";
 import { markerHtml } from "@/lib/markers";
 import { PROVINCES } from "@/lib/cr-provinces";
 
@@ -68,26 +68,6 @@ interface MapProps {
   selectedVenueId: string | null;
   resetTick: number;
   onSelectVenue: (venue: VenueGroup | null) => void;
-}
-
-function venueMatches(
-  venue: VenueGroup,
-  search: string,
-  genre: string,
-  province: string | null
-): boolean {
-  const q = search.trim().toLowerCase();
-  const qOk =
-    !q ||
-    venue.events.some((e) =>
-      `${e.artista} ${e.titulo} ${e.venueObj?.nombre} ${e.venue ?? ""}`
-        .toLowerCase()
-        .includes(q)
-    );
-  const gOk =
-    !genre || genre === "Todos" || venue.events.some((e) => e.categoria === genre);
-  const pOk = !province || venue.province === province;
-  return qOk && gOk && pOk;
 }
 
 export default function MapaChivos({

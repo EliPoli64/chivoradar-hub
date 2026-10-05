@@ -1,5 +1,14 @@
-import { getCategoriesSafe, getEventsSafe, getProvinceEventsSafe } from "@/lib/events";
-import { PROVINCE_BY_SLUG, resolveProvinceSlug } from "@/lib/cr-provinces";
+import {
+  getCategoriesSafe,
+  getEventsSafe,
+  getProvinceEventsSafe,
+} from "@/lib/events";
+import {
+  chivosPorProvincia,
+  groupEventsByVenue,
+  type GigEvent,
+} from "@/lib/venues";
+import { resolveProvinceSlug } from "@/lib/cr-provinces";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ExploreView from "@/components/explore/ExploreView";
@@ -13,30 +22,29 @@ interface Props {
 export default async function ExplorePage({ searchParams }: Props) {
   const { region } = await searchParams;
   const slug = resolveProvinceSlug(region);
-  const [events, categories] = await Promise.all([
+
+  // El conteo por provincia siempre es nacional, para que la silueta muestre
+  // dónde más hay chivos y no solo lo ya seleccionado. Sale de la misma
+  // entrada cacheada que la lista.
+  const [events, categories, country] = await Promise.all([
     slug ? getProvinceEventsSafe(slug) : getEventsSafe(),
     getCategoriesSafe(),
+    slug ? getEventsSafe() : Promise.resolve<GigEvent[]>([]),
   ]);
-  const provinceName = slug ? PROVINCE_BY_SLUG[slug]?.name : null;
 
   return (
     <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
 
-      <section className="pt-28 pb-16 max-w-7xl mx-auto px-5 md:px-6 lg:px-8">
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hueso-dim">
-          Explorar
-        </p>
-        <h1 className="font-display text-4xl md:text-5xl text-hueso mt-2">
-          {provinceName ? provinceName : "¿A dónde esta noche?"}
-        </h1>
-        <p className="text-hueso-dim mt-2">
-          {provinceName
-            ? `Todos los chivos del radar en ${provinceName}.`
-            : "Del garaje al estadio, de San José a Limón."}
-        </p>
-
-        <ExploreView events={events} categories={categories} region={slug} />
+      <section className="mx-auto max-w-7xl px-5 pt-28 pb-16 md:px-6 lg:px-8">
+        <ExploreView
+          events={events}
+          categories={categories}
+          region={slug}
+          provinceCounts={chivosPorProvincia(
+            groupEventsByVenue(slug ? country : events),
+          )}
+        />
       </section>
 
       <Footer />

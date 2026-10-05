@@ -104,7 +104,9 @@ export function groupEventsByVenue(events: GigEvent[]): VenueGroup[] {
     group.events.push(e);
   }
 
-  return Array.from(map.values()).sort((a, b) => b.events.length - a.events.length);
+  return Array.from(map.values()).sort(
+    (a, b) => b.events.length - a.events.length,
+  );
 }
 
 export const CR_BOUNDS: [[number, number], [number, number]] = [
@@ -130,6 +132,81 @@ export function formatFechaHora(iso: string): string {
     month: "short",
     year: "numeric",
   });
+}
+
+/**
+ * Fecha partida para el bloque-día de las listas de lugares. Se fija la zona
+ * horaria para que el render del servidor y el del cliente nunca discrepen.
+ */
+export interface PartesFecha {
+  dia: string;
+  mes: string;
+  dow: string;
+}
+
+const TZ_CR = "America/Costa_Rica";
+
+export function partesFecha(iso: string): PartesFecha {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { dia: "--", mes: "", dow: "" };
+  return {
+    dia: d.toLocaleDateString("es-ES", { day: "2-digit", timeZone: TZ_CR }),
+    mes: d.toLocaleDateString("es-ES", { month: "short", timeZone: TZ_CR }),
+    dow: d.toLocaleDateString("es-ES", { weekday: "short", timeZone: TZ_CR }),
+  };
+}
+
+/**
+ * El título del feed trae la fecha pegada ("GRUPO MARFIL • 09 OCTUBRE • 08
+ * PM"). Para mostrar el nombre del próximo chivo hay que cortar esa cola: la
+ * fecha ya está en el bloque-día de al lado.
+ */
+export function nombreArtista(e: { artista: string; titulo: string }): string {
+  const base = (e.artista || e.titulo || "")
+    .split(/[•|]/)[0]
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return base || e.titulo;
+}
+
+/** Un lugar coincide con la búsqueda y el género actuales. */
+export function venueMatches(
+  venue: VenueGroup,
+  search: string,
+  genre: string,
+  province: string | null = null,
+): boolean {
+  const q = search.trim().toLowerCase();
+  const qOk =
+    !q ||
+    venue.events.some((e) =>
+      `${e.artista} ${e.titulo} ${e.venueObj?.nombre ?? ""} ${e.venue ?? ""}`
+        .toLowerCase()
+        .includes(q),
+    );
+  const gOk =
+    !genre ||
+    genre === "Todos" ||
+    venue.events.some((e) => e.categoria === genre);
+  const pOk = !province || venue.province === province;
+  return qOk && gOk && pOk;
+}
+
+/**
+ * Chivos por provincia, ignorando el filtro de provincia para que siempre se
+ * vea dónde hay señal fuera de la selección actual.
+ */
+export function chivosPorProvincia(
+  groups: VenueGroup[],
+  search = "",
+  genre = "Todos",
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const v of groups) {
+    if (!venueMatches(v, search, genre, null)) continue;
+    out[v.province] = (out[v.province] ?? 0) + v.events.length;
+  }
+  return out;
 }
 
 export function formatHora(iso: string): string {
