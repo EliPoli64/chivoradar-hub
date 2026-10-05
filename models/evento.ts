@@ -1,38 +1,45 @@
+// Colección `eventos`. Ver dbstructure.md.
 import mongoose from "mongoose";
+import { COLLECTIONS } from "@/db/collections";
 
 const eventoSchema = new mongoose.Schema({
   titulo: {
     type: String,
-    required: true
+    required: true,
   },
   categoria: {
     type: String,
-    required: true
+    required: true,
   },
   urlImagen: {
     type: String,
-    required: false
+    required: false,
   },
+  // ref → venues._id
   ubicacion: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Venue",
-    required: false
+    required: false,
   },
   fechaHora: {
     type: Date,
-    required: true
+    required: true,
   },
   descripcion: {
     type: String,
-    required: false
+    required: false,
   },
+  // url del evento en el origen; es la clave de upsert del scraper
   link: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
+});
 
-})
+eventoSchema.index({ fechaHora: 1 });
+eventoSchema.index({ link: 1 }, { unique: true });
 
-const Evento = mongoose.models.Evento || mongoose.model("Evento", eventoSchema);
+const Evento =
+  mongoose.models.Evento || mongoose.model("Evento", eventoSchema, COLLECTIONS.eventos);
 
 export default Evento;

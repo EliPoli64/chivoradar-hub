@@ -185,16 +185,34 @@ export default async function EventoPage({ params }: Props) {
         <section className="mt-10 rounded-2xl border border-hueso/10 bg-panel p-6">
           <h2 className="font-display text-2xl text-hueso">Entradas</h2>
           {event.tiersPrecio?.length ? (
-            <ul className="mt-4 space-y-2">
-              {event.tiersPrecio.map((tier, i) => (
-                <li
-                  key={i}
-                  className="flex items-center justify-between gap-4 text-sm"
-                >
-                  <span className="text-hueso">{tier.nombre}</span>
-                  <span className="font-mono text-hueso">{formatPrecio(tier)}</span>
-                </li>
-              ))}
+            <ul className="mt-4 divide-y divide-hueso/10">
+              {event.tiersPrecio.map((tier, i) => {
+                // "REGULAR" se repite por zona (LUNETA, PALCO, GALERÍA…): la
+                // zona es lo que distingue un precio de otro.
+                const desambigua = Boolean(
+                  tier.zona && tier.nombre && tier.zona !== tier.nombre
+                );
+                return (
+                  <li
+                    key={i}
+                    className="flex items-baseline justify-between gap-4 py-2 text-sm"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-hueso">
+                        {tier.zona || tier.nombre}
+                      </span>
+                      {desambigua && (
+                        <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-hueso-dim">
+                          {tier.nombre}
+                        </span>
+                      )}
+                    </span>
+                    <span className="shrink-0 font-mono text-hueso">
+                      {formatPrecio(tier)}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="text-hueso-dim text-sm mt-4">Precios por confirmar.</p>

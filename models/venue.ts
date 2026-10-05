@@ -1,36 +1,43 @@
+// Colección `venues`. Ver dbstructure.md.
 import mongoose from "mongoose";
+import { COLLECTIONS } from "@/db/collections";
 
 const venueSchema = new mongoose.Schema({
   nombre: {
     type: String,
-    required: true
+    required: true,
   },
   slug: {
     type: String,
-    required: true
+    required: true,
   },
+  // salida del geocoding: { type: "Point", coordinates: [lng, lat] }
   ubicacion: {
     type: {
       type: String,
-      enum: ['Point'],
-      default: 'Point'
+      enum: ["Point"],
+      default: "Point",
     },
     coordinates: {
       type: [Number],
-      required: false
-    }
+      required: false,
+    },
   },
-  direccion: { // las direcciones en Costa Rica son complicadas
+  direccion: {
     type: String,
-    required: false
+    required: false,
   },
+  // objeto libre: cada lugar tiene las redes que tenga
   redesSociales: {
-    instagram: String,
-    facebook: String,
-    twitter: String
-  }
-})
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+    default: undefined,
+  },
+});
 
-const Venue = mongoose.models.Venue || mongoose.model("Venue", venueSchema);
+venueSchema.index({ ubicacion: "2dsphere" });
+
+const Venue =
+  mongoose.models.Venue || mongoose.model("Venue", venueSchema, COLLECTIONS.venues);
 
 export default Venue;

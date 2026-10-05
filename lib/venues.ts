@@ -15,6 +15,20 @@ export function distinctCategorias(events: { categoria: string }[]): string[] {
   return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
 }
 
+/**
+ * Precio de un tier. `zona`, `precioBase` y `cargo` llegaron después que el
+ * resto del scraper, así que los documentos viejos no los tienen y llegan null.
+ * precio = precioBase + cargo.
+ */
+export interface TierPrecioDoc {
+  nombre: string;
+  precio: number;
+  moneda: string;
+  zona?: string | null;
+  precioBase?: number | null;
+  cargo?: number | null;
+}
+
 export interface GigEvent {
   id: string;
   titulo: string;
@@ -33,7 +47,7 @@ export interface GigEvent {
   };
   venue?: string;
   date?: string;
-  tiersPrecio?: { nombre: string; precio: number; moneda: string }[];
+  tiersPrecio?: TierPrecioDoc[];
 }
 
 export interface VenueGroup {

@@ -122,21 +122,42 @@ components/
 └── Footer.tsx
 lib/
 ├── cr-provinces.ts      # Province polygons, centroids, colors, slug resolution
-├── events.ts            # Mongo aggregation + Redis cache + categories + mock fallbacks
+├── events.ts            # Redis cache + public feed API + mock fallbacks (no queries)
 ├── markers.ts           # Shared carreta-wheel marker HTML (with gig count)
 ├── mockEvents.ts        # Dev fallback dataset
 ├── redis.ts             # Upstash client + cache helpers + key versions
-└── venues.ts            # Venue grouping, formatting, CR bounds, category helpers
+└── venues.ts            # Domain types, venue grouping, formatting, category helpers
 db/
-└── mongodb.ts           # MongoDB connection with Mongoose
-models/                  # Mongoose models: Evento, Venue, TierPrecio
+├── mongodb.ts           # MongoDB connection with Mongoose
+├── collections.ts       # Canonical collection names (single source of truth)
+└── events.ts            # The one read path: aggregation + mapping to the domain shape
+models/                  # Mongoose models pinned to the real collection names
+└── dbstructure.md       # Reference for the collections and their fields
 ```
+
+## Data Layer
+
+`db/events.ts` is the **only** place that queries Mongo. `lib/events.ts` adds
+caching and the `...Safe` wrappers on top; the pages never touch a model.
+
+Collection names live once, in `db/collections.ts`. Each model is pinned to its
+real collection with it, and the aggregation reads the names back off the models
+(`Venue.collection.name`), so a rename cannot silently produce an empty `$lookup`.
+This matters: the tiers lookup used to say `tiersprecios` while the collection is
+`tiersPrecio`, and every event rendered "Precios por confirmar" because of it.
+
+When the *shape* of a cached value changes, bump the key suffix in `lib/redis.ts`
+— the version tracks the shape, not the content, so stale entries are never read.
 
 ## Data Models
 
-- **Evento** — Title, category, image, location (ref to `Venue`), date/time, description, ticketing link.
-- **Venue** — Name, slug, GeoJSON coordinates `[longitude, latitude]`, address, social media links.
-- **TierPrecio** — Priced tier per event (e.g., VIP, General, etc.).
+- **Evento** (`eventos`) — Title, category, image, location (ref to `Venue`), date/time, description, ticketing link (also the scraper's upsert key).
+- **Venue** (`venues`) — Name, slug, GeoJSON `ubicacion.coordinates` `[lng, lat]`, address, social media links.
+- **TierPrecio** (`tiersPrecio`) — Priced tier per event: `nombre`, `precio` (total), `moneda`, plus the later-scraped `zona` (section), `precioBase` and `cargo`, where `precio = precioBase + cargo`. Documents predating those fields simply lack them and read as `null` — no migration needed.
+
+Because `nombre` repeats across sections (`REGULAR` can mean LUNETA, PALCO or
+GALERÍA at different prices), the event page leads with `zona` and keeps `nombre`
+as the secondary label.
 
 ## API
 
@@ -144,7 +165,7 @@ models/                  # Mongoose models: Evento, Venue, TierPrecio
 
 Returns **upcoming** events (past concerts are filtered at the aggregation) with their venues and price tiers, sorted by date, and cached in Redis for `CACHE_TTL_SECONDS` (response header `Cache-Control: public, s-maxage=300, stale-while-revalidate=300`).
 
-Each event includes: `id`, `titulo`, `artista`, `categoria`, `fechaHora`, `descripcion`, `link`, `urlImagen`, `venueId`, `venueObj` (with `coordinates` `[lng, lat]`), `venue`, and `tiersPrecio`.
+Each event includes: `id`, `titulo`, `artista`, `categoria`, `fechaHora`, `descripcion`, `link`, `urlImagen`, `venueId`, `venueObj` (with `coordinates` `[lng, lat]`), `venue`, and `tiersPrecio` (`nombre`, `precio`, `moneda`, `zona`, `precioBase`, `cargo` — the last three `null` on older documents).
 
 ### `GET /api/categories`
 

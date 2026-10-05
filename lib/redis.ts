@@ -1,10 +1,18 @@
 import { Redis } from '@upstash/redis';
 
+/**
+ * Las claves versionan la FORMA del valor cacheado, no el contenido. Al
+ * cambiar qué se trae de la aggregation hay que subir el sufijo: si no, se
+ * siguen leyendo entradas viejas con la forma anterior hasta que vencen.
+ *
+ * v3 — los precios ahora se leen de la colección correcta (`tiersPrecio`) y cada
+ *      tier trae zona / precioBase / cargo.
+ */
 export const KEYS = {
-  events: 'chivoradar:events:v2',
+  events: 'chivoradar:events:v3',
   categories: 'chivoradar:categories:v1',
-  venue: (slug: string) => `chivoradar:venue:${slug}:v2`,
-  province: (slug: string) => `chivoradar:province:${slug}:v2`,
+  venue: (slug: string) => `chivoradar:venue:${slug}:v3`,
+  province: (slug: string) => `chivoradar:province:${slug}:v3`,
 } as const;
 
 const DEFAULT_TTL = 300;
