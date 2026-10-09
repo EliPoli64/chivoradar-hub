@@ -16,7 +16,6 @@ const notificacionSchema = new mongoose.Schema(
       type: String,
       default: "email",
     },
-    // Los eventos que van en este resumen.
     eventos: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -28,7 +27,7 @@ const notificacionSchema = new mongoose.Schema(
       enum: ["pendiente", "enviada", "fallida"],
       default: "pendiente",
     },
-    // Hora preferida del usuario, ya resuelta a UTC.
+    // hora preferida del usuario, resuelta a UTC
     programadaPara: {
       type: Date,
       required: true,
@@ -45,9 +44,9 @@ const notificacionSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Consulta del cron: pendientes cuyo turno ya llegó.
+// consulta del cron: pendientes cuyo turno ya llegó
 notificacionSchema.index({ estado: 1, programadaPara: 1 });
-// Historial por usuario.
+// historial por usuario
 notificacionSchema.index({ usuario: 1, programadaPara: -1 });
 
 const Notificacion =

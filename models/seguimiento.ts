@@ -13,7 +13,7 @@ const seguimientoSchema = new mongoose.Schema(
       ref: "Venue",
       required: true,
     },
-    // Denominormalización opcional para pintar /mis-lugares sin un $lookup.
+    // denormalizado para la UI
     venueSlug: {
       type: String,
       required: false,
@@ -22,9 +22,8 @@ const seguimientoSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// No se puede seguir dos veces el mismo lugar.
 seguimientoSchema.index({ usuario: 1, venue: 1 }, { unique: true });
-// Fan-out: "¿quién sigue este venue?".
+// fan-out: quién sigue este venue
 seguimientoSchema.index({ venue: 1 });
 
 const Seguimiento =

@@ -175,3 +175,5 @@ Returns the distinct `categoria` values present in the **upcoming** feed, sorted
 
 - User gig submissions ("+ Posteá tu Chivo") — `/submit`
 - Ticket-selling site scraping (moved to a separate repository)
+- DocumentDB deployment on Azure
+- Redis deployment on Azure
