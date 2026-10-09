@@ -1,4 +1,3 @@
-// Colección `eventos`. Ver dbstructure.md.
 import mongoose from "mongoose";
 import { COLLECTIONS } from "@/db/collections";
 
@@ -34,10 +33,16 @@ const eventoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  createdAt: {
+    type: Date,
+    required: false,
+  },
 });
 
 eventoSchema.index({ fechaHora: 1 });
 eventoSchema.index({ link: 1 }, { unique: true });
+eventoSchema.index({ createdAt: -1 });
+eventoSchema.index({ ubicacion: 1, createdAt: -1 });
 
 const Evento =
   mongoose.models.Evento || mongoose.model("Evento", eventoSchema, COLLECTIONS.eventos);

@@ -1,6 +1,3 @@
-// Colección `tiersPrecio`. Ver dbstructure.md.
-// El nombre va explícito porque el de mongoose ("tierprecios", en minúscula) no
-// es el real, y esa diferencia hacía que el $lookup del feed no encontrara nada.
 import mongoose from "mongoose";
 import { COLLECTIONS } from "@/db/collections";
 

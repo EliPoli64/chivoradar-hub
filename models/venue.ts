@@ -1,4 +1,3 @@
-// Colección `venues`. Ver dbstructure.md.
 import mongoose from "mongoose";
 import { COLLECTIONS } from "@/db/collections";
 
@@ -11,7 +10,6 @@ const venueSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // salida del geocoding: { type: "Point", coordinates: [lng, lat] }
   ubicacion: {
     type: {
       type: String,
@@ -27,7 +25,6 @@ const venueSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  // objeto libre: cada lugar tiene las redes que tenga
   redesSociales: {
     type: mongoose.Schema.Types.Mixed,
     required: false,

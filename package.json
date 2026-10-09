@@ -12,6 +12,8 @@
     "@next/env": "^16.2.4",
     "@upstash/redis": "^1.39.0",
     "dotenv": "^17.4.2",
+    "firebase": "^13.0.0",
+    "firebase-admin": "^14.5.0",
     "inngest": "^4.2.6",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",

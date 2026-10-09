@@ -5,6 +5,9 @@ export const COLLECTIONS = {
   eventos: "eventos",
   venues: "venues",
   tiersPrecio: "tiersPrecio",
+  usuarios: "usuarios",
+  seguimientos: "seguimientos",
+  notificaciones: "notificaciones",
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
