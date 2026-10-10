@@ -5,14 +5,14 @@ import { Redis } from '@upstash/redis';
  * cambiar qué se trae de la aggregation hay que subir el sufijo: si no, se
  * siguen leyendo entradas viejas con la forma anterior hasta que vencen.
  *
- * v3 — los precios ahora se leen de la colección correcta (`tiersPrecio`) y cada
- *      tier trae zona / precioBase / cargo.
+ * v4 — `id` de cada evento se serializa a string (la aggregation devuelve
+ *      ObjectId de BSON y el cliente no puede recibirlo).
  */
 export const KEYS = {
-  events: 'chivoradar:events:v3',
+  events: 'chivoradar:events:v4',
   categories: 'chivoradar:categories:v1',
-  venue: (slug: string) => `chivoradar:venue:${slug}:v3`,
-  province: (slug: string) => `chivoradar:province:${slug}:v3`,
+  venue: (slug: string) => `chivoradar:venue:${slug}:v4`,
+  province: (slug: string) => `chivoradar:province:${slug}:v4`,
 } as const;
 
 const DEFAULT_TTL = 300;

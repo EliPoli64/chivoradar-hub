@@ -1,0 +1,15 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Chivo Radar",
+        "supportEmail": "support@chivoradar.com",
+        "authorizedRedirectUris": [
+          "https://chivoradar.firebaseapp.com/__/auth/handler",
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}

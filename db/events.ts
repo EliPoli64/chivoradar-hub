@@ -53,7 +53,9 @@ export function formatEvento(event: EventoRaw): GigEvent {
   const fechaHora = patch ? new Date(patch) : new Date(event.fechaHora);
 
   return {
-    id: event._id,
+    // la aggregation devuelve _id como ObjectId de BSON; el cliente sólo puede
+    // recibir valores planos, así que se serializa acá.
+    id: String(event._id),
     titulo: event.titulo,
     // el título del feed trae la fecha pegada ("X • 09 OCTUBRE • 08 PM")
     artista: event.titulo.split(" - ")[0] || event.titulo,
