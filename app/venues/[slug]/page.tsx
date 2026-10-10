@@ -2,12 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { getVenueEventsSafe } from "@/lib/events";
+import { getSessionUsuario } from "@/lib/auth/session";
+import { leSigue } from "@/db/follows";
 import { PROVINCES, provinceForPoint } from "@/lib/cr-provinces";
 import type { VenueGroup } from "@/lib/venues";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import EventList from "@/components/events/EventList";
 import VenueMiniMap from "@/components/venues/VenueMiniMap";
+import FollowButton from "@/components/follows/FollowButton";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +22,11 @@ export default async function VenuePage({ params }: Props) {
   const { slug } = await params;
   const events = await getVenueEventsSafe(slug);
   if (events.length === 0) notFound();
+
+  const usuario = await getSessionUsuario();
+  const autenticado = Boolean(usuario);
+  const venueId = events[0].venueId ?? null;
+  const siguiendo = usuario && venueId ? await leSigue(usuario._id, venueId) : false;
 
   const first = events[0];
   const coords = first.venueObj?.coordinates;
@@ -68,9 +76,19 @@ export default async function VenuePage({ params }: Props) {
             </p>
           </div>
 
-          <h1 className="font-display text-4xl md:text-5xl leading-[1.05] text-hueso mt-3">
-            {venue.name}
-          </h1>
+          <div className="flex flex-wrap items-start justify-between gap-4 mt-3">
+            <h1 className="font-display text-4xl md:text-5xl leading-[1.05] text-hueso">
+              {venue.name}
+            </h1>
+            {venueId && (
+              <FollowButton
+                venueId={venueId}
+                venueSlug={venue.slug ?? undefined}
+                iniciarSiguiendo={siguiendo}
+                autenticado={autenticado}
+              />
+            )}
+          </div>
 
           <div className="flex items-center gap-1.5 mt-3 text-sm text-hueso-dim">
             <MapPin size={15} className="shrink-0" style={{ color: venue.color }} />

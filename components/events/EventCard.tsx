@@ -35,7 +35,10 @@ export default function EventCard({
       : "#E6323F";
 
   return (
-    <article className="group bg-panel border border-hueso/10 rounded-2xl overflow-hidden hover:border-hueso/25 transition-colors">
+    // Altura fija: dimensionada para títulos de hasta 3 líneas (3 × 25px a
+    // text-xl/leading-tight en el h3). Con el contenido en flex-col y el botón
+    // en mt-auto, todas las cards de la grilla quedan idénticas.
+    <article className="group flex h-[26rem] flex-col bg-panel border border-hueso/10 rounded-2xl overflow-hidden hover:border-hueso/25 transition-colors">
       <div className="relative h-48 w-full overflow-hidden">
         {image ? (
           <Image
@@ -60,11 +63,10 @@ export default function EventCard({
         )}
       </div>
 
-      {/* flex column + mt-auto en el botón: los botones de una misma fila
-          quedan alineados aunque los títulos ocupen distinto número de líneas */}
-      <div className="flex flex-col p-5">
+      <div className="flex flex-1 flex-col p-5">
         <Link href={`/eventos/${id}`} className="group-hover:text-rojo transition-colors">
-          <h3 className="text-xl font-bold leading-tight text-hueso group-hover:text-rojo transition-colors">
+          {/* 3 líneas fijas: los títulos largos se cortan con puntos suspensivos */}
+          <h3 className="line-clamp-3 h-[4.7rem] overflow-hidden text-xl font-bold leading-tight text-hueso group-hover:text-rojo transition-colors">
             {title}
           </h3>
         </Link>
