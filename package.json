@@ -2,6 +2,9 @@
   "name": "chivo-radar",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -39,6 +42,9 @@
     "typescript": "^5"
   },
   "overrides": {
-    "@grpc/grpc-js": "^1.14.6"
+    "@grpc/grpc-js": "^1.14.6",
+    "firebase-admin": {
+      "jwks-rsa": "^3.2.2"
+    }
   }
 }
