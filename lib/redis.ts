@@ -13,6 +13,7 @@ export const KEYS = {
   categories: 'chivoradar:categories:v1',
   venue: (slug: string) => `chivoradar:venue:${slug}:v4`,
   province: (slug: string) => `chivoradar:province:${slug}:v4`,
+  venueGroups: 'chivoradar:venue-groups:v1',
 } as const;
 
 const DEFAULT_TTL = 300;

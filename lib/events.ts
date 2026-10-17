@@ -9,7 +9,7 @@ import { loadEventos } from "@/db/events";
 import { provinceForPoint, PROVINCE_BY_SLUG } from "@/lib/cr-provinces";
 import { KEYS, getCached, setCached, getTTL } from "@/lib/redis";
 import { MOCK_EVENTS } from "@/lib/mockEvents";
-import { distinctCategorias, isSinCategoria, type GigEvent } from "@/lib/venues";
+import { distinctCategorias, isSinCategoria, groupEventsByVenue, type GigEvent, type VenueGroup } from "@/lib/venues";
 
 function isUpcoming(e: GigEvent): boolean {
   return new Date(e.fechaHora).getTime() >= Date.now();
@@ -118,6 +118,38 @@ export async function getCategoriesSafe(): Promise<string[]> {
 export async function getEventById(id: string): Promise<GigEvent | null> {
   const feed = await getEventsFeed();
   return feed.find((e) => e.id === id) ?? null;
+}
+
+/**
+ * Lugares agrupados con su agenda, cacheados ya agrupados: el listing de
+ * /venues solo necesita esto y no el feed crudo. En un hit de caché se purgan
+ * los chivos que ya pasaron (igual que el feed) para que la caché vencida no
+ * muestre fechas muertas.
+ */
+async function getVenueGroups(): Promise<VenueGroup[]> {
+  const key = KEYS.venueGroups;
+  const cached = await getCached<VenueGroup[]>(key);
+  if (cached) {
+    const alive = cached
+      .map((v) => ({ ...v, events: v.events.filter(isUpcoming) }))
+      .filter((v) => v.events.length > 0);
+    if (alive.length > 0) {
+      return alive.sort((a, b) => b.events.length - a.events.length);
+    }
+  }
+
+  const feed = await getEventsFeed();
+  const groups = groupEventsByVenue(feed);
+  await setCached(key, groups, getTTL());
+  return groups;
+}
+
+export async function getVenueGroupsSafe(): Promise<VenueGroup[]> {
+  try {
+    return await getVenueGroups();
+  } catch {
+    return groupEventsByVenue(MOCK_EVENTS.filter(isUpcoming));
+  }
 }
 
 export async function getEventByIdSafe(id: string): Promise<GigEvent | null> {

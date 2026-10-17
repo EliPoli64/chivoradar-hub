@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { getEventsSafe } from "@/lib/events";
-import { groupEventsByVenue, chivosPorProvincia } from "@/lib/venues";
+import { getVenueGroupsSafe } from "@/lib/events";
+import { chivosPorProvincia } from "@/lib/venues";
 import { PROVINCE_BY_SLUG, resolveProvinceSlug } from "@/lib/cr-provinces";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -19,8 +19,7 @@ export default async function VenuesPage({ searchParams }: Props) {
   const slug = resolveProvinceSlug(region);
   const province = slug ? PROVINCE_BY_SLUG[slug] : null;
 
-  const events = await getEventsSafe();
-  const all = groupEventsByVenue(events);
+  const all = await getVenueGroupsSafe();
 
   // La silueta siempre muestra el país completo: desde una provincia se ve
   // dónde más hay señal, no solo lo que ya está seleccionado.
