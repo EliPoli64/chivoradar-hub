@@ -121,7 +121,7 @@ export default function ExploreView({
                     key={g}
                     onClick={() => setGenre(on ? null : g)}
                     aria-pressed={on}
-                    className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                    className={`rounded-full border px-2.5 py-1 text-xs transition-all duration-150 active:scale-90 ${
                       on
                         ? "border-rojo bg-rojo text-white"
                         : "border-hueso/15 text-hueso-dim hover:border-hueso/40 hover:text-hueso"
@@ -149,20 +149,26 @@ export default function ExploreView({
         </p>
 
         {filtered.length > 0 ? (
-          <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          /* la key remonta la grilla al cambiar el género: las cards
+             reaparecen con un fade suave y sin desplazamiento */
+          <div
+            key={genre ?? "todos"}
+            className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3"
+          >
             {filtered.map((gig) => (
-              <EventCard
-                key={gig.id}
-                id={gig.id}
-                title={gig.titulo}
-                artist={gig.artista}
-                venue={gig.venue ?? ""}
-                date={gig.date ?? ""}
-                genre={gig.categoria}
-                image={gig.urlImagen ?? ""}
-                coordinates={gig.venueObj?.coordinates}
-                link={gig.link}
-              />
+              <div key={gig.id} className="anim-fade">
+                <EventCard
+                  id={gig.id}
+                  title={gig.titulo}
+                  artist={gig.artista}
+                  venue={gig.venue ?? ""}
+                  date={gig.date ?? ""}
+                  genre={gig.categoria}
+                  image={gig.urlImagen ?? ""}
+                  coordinates={gig.venueObj?.coordinates}
+                  link={gig.link}
+                />
+              </div>
             ))}
           </div>
         ) : (
@@ -204,7 +210,7 @@ function EmptyState({
   if (genre) reasons.push({ label: genre, clear: onClearGenre });
 
   return (
-    <div className="mt-5 border-t border-hueso/10 pt-6">
+    <div className="anim-rise mt-5 border-t border-hueso/10 pt-6">
       <p className="max-w-[46ch] text-hueso">
         {provinceName
           ? `No hay chivos en ${provinceName} con estos filtros.`

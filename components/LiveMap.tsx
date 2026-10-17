@@ -217,8 +217,10 @@ export default function LiveMap({ initialCategories }: LiveMapProps) {
       </div>
 
       {/* panel de eventos (desktop): va al lado contrario del riel, para no
-          tapar el centro del mapa */}
-      <div className="hidden md:block absolute top-28 right-4 z-30 w-[380px] max-w-[calc(100vw-2rem)]">
+          tapar el centro del mapa. Los mismos límites verticales que el riel
+          izquierdo (top-20/bottom-4) y centrado entre ellos, para que quede a
+          la misma distancia del techo y del piso del mapa */}
+      <div className="hidden md:flex absolute top-20 bottom-4 right-4 z-30 w-[380px] max-w-[calc(100vw-2rem)] items-center">
         {selected && (
           <EventSidePanel
             venue={selected}

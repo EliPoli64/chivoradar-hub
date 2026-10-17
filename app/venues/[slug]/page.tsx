@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import EventList from "@/components/events/EventList";
 import VenueMiniMap from "@/components/venues/VenueMiniMap";
 import FollowButton from "@/components/follows/FollowButton";
+import RouteTransition from "@/components/RouteTransition";
 
 export const dynamic = "force-dynamic";
 
@@ -52,69 +53,72 @@ export default async function VenuePage({ params }: Props) {
     <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
 
-      <section className="pt-28 pb-16 max-w-4xl mx-auto px-5 md:px-6 lg:px-8">
-        <Link
-          href="/venues"
-          className="inline-flex items-center gap-1.5 text-sm text-hueso-dim hover:text-hueso transition-colors"
-        >
-          <ArrowLeft size={14} />
-          Volver a Lugares
-        </Link>
+      <RouteTransition>
+        <section className="pt-28 pb-16 max-w-4xl mx-auto px-5 md:px-6 lg:px-8">
+          <Link
+            href="/venues"
+            transitionTypes={["nav-back"]}
+            className="inline-flex items-center gap-1.5 text-sm text-hueso-dim hover:text-hueso transition-colors"
+          >
+            <ArrowLeft size={14} />
+            Volver a Lugares
+          </Link>
 
-        {/* encabezado del lugar */}
-        <div
-          className="mt-4 rounded-2xl border border-hueso/10 bg-panel p-6 overflow-hidden relative"
-          style={{ boxShadow: `inset 0 6px 0 ${venue.color}` }}
-        >
-          <div className="flex items-center gap-2">
-            <span
-              className="w-3 h-3 rounded-full shrink-0"
-              style={{ background: venue.color, boxShadow: `0 0 10px ${venue.color}` }}
-            />
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-hueso-dim">
-              {venue.province}
+          {/* encabezado del lugar */}
+          <div
+            className="mt-4 rounded-2xl border border-hueso/10 bg-panel p-6 overflow-hidden relative"
+            style={{ boxShadow: `inset 0 6px 0 ${venue.color}` }}
+          >
+            <div className="flex items-center gap-2">
+              <span
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ background: venue.color, boxShadow: `0 0 10px ${venue.color}` }}
+              />
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-hueso-dim">
+                {venue.province}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-start justify-between gap-4 mt-3">
+              <h1 className="font-display text-4xl md:text-5xl leading-[1.05] text-hueso">
+                {venue.name}
+              </h1>
+              {venueId && (
+                <FollowButton
+                  venueId={venueId}
+                  venueSlug={venue.slug ?? undefined}
+                  iniciarSiguiendo={siguiendo}
+                  autenticado={autenticado}
+                />
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 mt-3 text-sm text-hueso-dim">
+              <MapPin size={15} className="shrink-0" style={{ color: venue.color }} />
+              <span>{venue.address || "Dirección por confirmar"}</span>
+            </div>
+
+            <p
+              className="font-mono text-[11px] uppercase tracking-[0.2em] mt-4"
+              style={{ color: venue.color }}
+            >
+              {venue.events.length} {venue.events.length === 1 ? "chivo" : "chivos"} próximos
             </p>
           </div>
 
-          <div className="flex flex-wrap items-start justify-between gap-4 mt-3">
-            <h1 className="font-display text-4xl md:text-5xl leading-[1.05] text-hueso">
-              {venue.name}
-            </h1>
-            {venueId && (
-              <FollowButton
-                venueId={venueId}
-                venueSlug={venue.slug ?? undefined}
-                iniciarSiguiendo={siguiendo}
-                autenticado={autenticado}
-              />
-            )}
-          </div>
+          {/* mini mapa */}
+          {position && (
+            <div className="mt-6">
+              <VenueMiniMap venue={venue} />
+            </div>
+          )}
 
-          <div className="flex items-center gap-1.5 mt-3 text-sm text-hueso-dim">
-            <MapPin size={15} className="shrink-0" style={{ color: venue.color }} />
-            <span>{venue.address || "Dirección por confirmar"}</span>
-          </div>
-
-          <p
-            className="font-mono text-[11px] uppercase tracking-[0.2em] mt-4"
-            style={{ color: venue.color }}
-          >
-            {venue.events.length} {venue.events.length === 1 ? "chivo" : "chivos"} próximos
-          </p>
-        </div>
-
-        {/* mini mapa */}
-        {position && (
-          <div className="mt-6">
-            <VenueMiniMap venue={venue} />
-          </div>
-        )}
-
-        <h2 className="font-display text-2xl mt-10 mb-4 text-hueso">
-          Chivos en este lugar
-        </h2>
-        <EventList events={venue.events} color={venue.color} />
-      </section>
+          <h2 className="font-display text-2xl mt-10 mb-4 text-hueso">
+            Chivos en este lugar
+          </h2>
+          <EventList events={venue.events} color={venue.color} />
+        </section>
+      </RouteTransition>
 
       <Footer />
     </main>

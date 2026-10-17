@@ -12,6 +12,7 @@ import { resolveProvinceSlug } from "@/lib/cr-provinces";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ExploreView from "@/components/explore/ExploreView";
+import RouteTransition from "@/components/RouteTransition";
 
 export const dynamic = "force-dynamic";
 
@@ -35,17 +36,18 @@ export default async function ExplorePage({ searchParams }: Props) {
   return (
     <main className="min-h-screen bg-cafetal text-hueso selection:bg-rojo selection:text-white">
       <Navbar />
-
-      <section className="mx-auto max-w-7xl px-5 pt-28 pb-16 md:px-6 lg:px-8">
-        <ExploreView
-          events={events}
-          categories={categories}
-          region={slug}
-          provinceCounts={chivosPorProvincia(
-            groupEventsByVenue(slug ? country : events),
-          )}
-        />
-      </section>
+      <RouteTransition>
+        <section className="mx-auto max-w-7xl px-5 pt-28 pb-16 md:px-6 lg:px-8">
+          <ExploreView
+            events={events}
+            categories={categories}
+            region={slug}
+            provinceCounts={chivosPorProvincia(
+              groupEventsByVenue(slug ? country : events),
+            )}
+          />
+        </section>
+      </RouteTransition>
 
       <Footer />
     </main>

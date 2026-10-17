@@ -1,4 +1,5 @@
 "use client";
+import { ViewTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, Ticket } from "lucide-react";
@@ -41,13 +42,15 @@ export default function EventCard({
     <article className="group flex h-[26rem] flex-col bg-panel border border-hueso/10 rounded-2xl overflow-hidden hover:border-hueso/25 transition-colors">
       <div className="relative h-48 w-full overflow-hidden">
         {image ? (
-          <Image
-            src={image}
-            alt={artist}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <ViewTransition name={`event-${id}`} share="chivo-morph" default="none">
+            <Image
+              src={image}
+              alt={artist}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          </ViewTransition>
         ) : (
           <div className="w-full h-full bg-cafetal flex items-center justify-center">
             <span className="text-hueso-dim text-sm">Sin imagen</span>

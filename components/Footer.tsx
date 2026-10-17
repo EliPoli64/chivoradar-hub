@@ -7,7 +7,10 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-cafetal border-t border-hueso/10 pt-16 pb-8">
+    <footer
+      style={{ viewTransitionName: "site-footer" }}
+      className="bg-cafetal border-t border-hueso/10 pt-16 pb-8"
+    >
       <div className="max-w-7xl mx-auto px-5 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div className="col-span-1 md:col-span-1">

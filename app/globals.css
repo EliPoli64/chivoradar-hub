@@ -200,6 +200,20 @@ body {
   animation: riseIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* fade sin desplazamiento: para reapariciones discretas (filtros) */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.anim-fade {
+  animation: fadeIn 0.25s ease both;
+}
+
 .anim-panel-in {
   animation: panelInUp 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -388,8 +402,122 @@ body {
   color: #fff !important;
 }
 
+/* --- transiciones de ruta: "el barrido del radar" ---
+   La página vieja cae rápido; la nueva florece como un blip con el mismo
+   easing con overshoot que blipIn. Los durations son asimétricos a propósito:
+   la salida no debe competir con la entrada. */
+@keyframes vtPageExit {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes vtPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+::view-transition-old(.page) {
+  animation: 120ms ease-in both vtPageExit;
+}
+
+::view-transition-new(.page) {
+  animation: 380ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both vtPageEnter;
+}
+
+/* slides direccionales: etiquetadas con transitionTypes en <Link> */
+@keyframes vtSlide {
+  from {
+    translate: var(--slide-offset, 0);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+::view-transition-old(.nav-forward) {
+  --slide-offset: -60px;
+  animation:
+    120ms ease-in both vtPageExit,
+    300ms ease-in-out both vtSlide reverse;
+}
+
+::view-transition-new(.nav-forward) {
+  --slide-offset: 60px;
+  animation:
+    380ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both vtPageEnter,
+    420ms ease-in-out both vtSlide;
+}
+
+::view-transition-old(.nav-back) {
+  --slide-offset: 60px;
+  animation:
+    120ms ease-in both vtPageExit,
+    300ms ease-in-out both vtSlide reverse;
+}
+
+::view-transition-new(.nav-back) {
+  --slide-offset: -60px;
+  animation:
+    380ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both vtPageEnter,
+    420ms ease-in-out both vtSlide;
+}
+
+/* el morph del póster esconde los artefactos de interpolación con un blur
+   mínimo a mitad del vuelo */
+::view-transition-image-pair(.chivo-morph) {
+  animation-name: vtMorphBlur;
+}
+
+@keyframes vtMorphBlur {
+  30% {
+    filter: blur(2px);
+  }
+}
+
+::view-transition-group(.chivo-morph) {
+  animation-duration: 420ms;
+}
+
+/* navbar y footer son anclas espaciales: no se mueven, solo el contenido */
+::view-transition-group(site-header),
+::view-transition-group(site-footer) {
+  animation: none;
+  z-index: 1001;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-footer) {
+  display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-footer) {
+  animation: none;
+}
+
+/* los clics durante la transición deben llegar a la página viva */
+::view-transition {
+  pointer-events: none;
+}
+
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0.01ms !important;
+  }
   .carreta-wheel.selected .wheel-spokes,
   .carreta-wheel.selected .radar-ring,
   .blip-bob,

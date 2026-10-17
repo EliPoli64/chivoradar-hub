@@ -10,7 +10,10 @@ export default function NavbarClient({ usuario }: { usuario: UsuarioNav | null }
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 inset-x-0 z-[1001] border-b border-hueso/10 bg-cafetal/80 backdrop-blur-md">
+    <nav
+      style={{ viewTransitionName: "site-header" }}
+      className="fixed top-0 inset-x-0 z-[1001] border-b border-hueso/10 bg-cafetal/80 backdrop-blur-md"
+    >
       <div className="relative max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
           <Logo size={30} className="drop-shadow-[0_0_10px_rgba(230,50,63,0.4)]" />
