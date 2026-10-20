@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const connectionString = process.env.CONN_STRING || "mongodb://localhost:27017";
+const connectionString = (
+  process.env.CONN_STRING || "mongodb://localhost:27017"
+).replace(/%(?![0-9a-fA-F]{2})/g, "%25");
 const dbName = process.env.DB_NAME || "chivoradar";
 
 let isConnected = false;
